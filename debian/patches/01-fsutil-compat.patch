@@ -1,0 +1,16 @@
+-- a/github.com/moby/buildkit/session/filesync/filesync.go	2024-07-19 19:45:38.704574570 +0200
++++ b/github.com/moby/buildkit/session/filesync/filesync.go	2024-07-19 19:45:22.452573877 +0200
+@@ -109,7 +109,12 @@
+ 		ExcludePatterns: excludes,
+ 		IncludePatterns: includes,
+ 		FollowPaths:     followPaths,
+-		Map:             dir.Map,
++		Map: func(path string, stat *fstypes.Stat) fsutil.MapResult {
++			if dir.Map(path, stat) {
++				return fsutil.MapResultKeep
++			}
++			return fsutil.MapResultExclude
++		},
+ 	}), progress)
+ 	if doneCh != nil {
+ 		if err != nil {

@@ -1,0 +1,2 @@
+apiVersion: debco/v1alpha1
+kind: Recipe

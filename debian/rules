@@ -1,0 +1,30 @@
+#!/usr/bin/make -f
+
+export DEB_HOST_MULTIARCH ?= $(shell dpkg-architecture -qDEB_HOST_MULTIARCH)
+
+export BUILD_ARCH ?= $(shell dpkg-architecture -qDEB_BUILD_ARCH)
+export HOST_ARCH ?= $(shell dpkg-architecture -qDEB_HOST_ARCH)
+export VERSION ?= $(shell git describe --tags --abbrev=0)
+
+%:
+	# Some embedded assets need to be copied to the build directory.
+	mkdir -p _build/src/github.com/dpeckett/debco/internal/secondstage/slimify
+	cp -r internal/secondstage/slimify/embed _build/src/github.com/dpeckett/debco/internal/secondstage/slimify/embed
+
+	dh $@ --builddirectory=_build --buildsystem=golang
+
+override_dh_auto_build:
+	dh_auto_build -- -ldflags "-X 'github.com/dpeckett/debco/internal/constants.Version=$(VERSION)'"
+
+override_dh_auto_install:
+	dh_auto_install -- --no-source
+
+override_dh_auto_test:
+ifneq ($(BUILD_ARCH), $(HOST_ARCH))
+	@echo "Skipping tests for cross-compilation"
+else
+	dh_auto_test
+endif
+
+override_dh_shlibdeps:
+	dh_shlibdeps -l/usr/$(DEB_HOST_MULTIARCH)/lib

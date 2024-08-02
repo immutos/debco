@@ -1,0 +1,5 @@
+/debco
+/dist/
+
+# Output tarballs
+/*.tar

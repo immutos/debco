@@ -1,0 +1,68 @@
+# A very minimal Debian sid image.
+apiVersion: debco/v1alpha1
+kind: Recipe
+
+# Various options/flags to use when building the image.
+options:
+  # Don't automatically include priority required packages.
+  omitRequired: true
+  # Slimify the image by removing unnecessary files (ala debian-slim).
+  slimify: true
+
+# Where to get the packages from.
+sources:
+  - url: https://deb.debian.org/debian
+    signedBy: https://ftp-master.debian.org/keys/archive-key-12.asc
+    distribution: sid
+    components:
+      - main
+
+# The packages to include in the image.
+packages:
+  exclude:
+    - libelogind0 # Until we've added support for detecting conflicts.
+  include:
+    - base-files
+    - base-passwd
+    - coreutils
+    - ca-certificates
+    - dash
+    - diffutils
+    - dpkg
+    - findutils
+    - grep
+    - libc6
+    - libc-bin
+    - libgcc-s1
+    - libgomp1
+    - libstdc++6
+    - login
+    - netbase
+    - openssl
+    - perl-base
+    - sed
+    - tzdata
+
+# Create a distroless style nonroot user.
+groups:
+  - name: nonroot
+    gid: 65532
+users:
+  - name: nonroot
+    uid: 65532
+    groups: 
+      - nonroot
+    homeDir: /home/nonroot
+    shell: /usr/sbin/nologin
+
+# Configuration for the OCI image.
+container:
+  user: nonroot
+  workingDir: /home/nonroot
+  cmd:
+    - /usr/bin/sh
+  labels:
+    org.opencontainers.image.title: "Debian Sid UltraSlim"
+    org.opencontainers.image.description: "A very minimal Debian Sid image"
+    org.opencontainers.image.authors: "Damian Peckett <damian@pecke.tt>"
+    org.opencontainers.image.source: "https://github.com/dpeckett/debco"
