@@ -40,8 +40,6 @@ import (
 	"github.com/dpeckett/debco/internal/buildkit"
 	"github.com/dpeckett/debco/internal/constants"
 	"github.com/dpeckett/debco/internal/database"
-	"github.com/dpeckett/debco/internal/diskcache"
-	"github.com/dpeckett/debco/internal/hashreader"
 	"github.com/dpeckett/debco/internal/recipe"
 	latestrecipe "github.com/dpeckett/debco/internal/recipe/v1alpha1"
 	"github.com/dpeckett/debco/internal/resolve"
@@ -50,6 +48,8 @@ import (
 	"github.com/dpeckett/debco/internal/types"
 	"github.com/dpeckett/debco/internal/unpack"
 	"github.com/dpeckett/debco/internal/util"
+	"github.com/dpeckett/debco/internal/util/diskcache"
+	"github.com/dpeckett/debco/internal/util/hashreader"
 	"github.com/gregjones/httpcache"
 	ocispecs "github.com/opencontainers/image-spec/specs-go/v1"
 	"github.com/urfave/cli/v2"
@@ -364,11 +364,13 @@ func loadPackageDB(ctx context.Context, recipe *latestrecipe.Recipe, platform oc
 	var componentsMu sync.Mutex
 	var components []source.Component
 
-	var progress *mpb.Progress
-	if !slog.Default().Enabled(ctx, slog.LevelDebug) {
-		progress = mpb.NewWithContext(ctx)
-		defer progress.Shutdown()
+	var progressOutput io.Writer = os.Stdout
+	if slog.Default().Enabled(ctx, slog.LevelDebug) {
+		progressOutput = io.Discard
 	}
+
+	progress := mpb.NewWithContext(ctx, mpb.WithOutput(progressOutput))
+	defer progress.Shutdown()
 
 	{
 		sourceConfs := append([]latestrecipe.SourceConfig{}, recipe.Sources...)
@@ -387,28 +389,21 @@ func loadPackageDB(ctx context.Context, recipe *latestrecipe.Recipe, platform oc
 
 		g, ctx := errgroup.WithContext(ctx)
 
-		var bar *mpb.Bar
-		if progress != nil {
-			bar = progress.AddBar(int64(len(sourceConfs)),
-				mpb.PrependDecorators(
-					decor.Name("Source: "),
-					decor.CountersNoUnit("%d / %d"),
-				),
-				mpb.AppendDecorators(
-					decor.Percentage(),
-				),
-			)
-		}
+		bar := progress.AddBar(int64(len(sourceConfs)),
+			mpb.PrependDecorators(
+				decor.Name("Source: "),
+				decor.CountersNoUnit("%d / %d"),
+			),
+			mpb.AppendDecorators(
+				decor.Percentage(),
+			),
+		)
 
 		for _, sourceConf := range sourceConfs {
 			sourceConf := sourceConf
 
 			g.Go(func() error {
-				defer func() {
-					if bar != nil {
-						bar.Increment()
-					}
-				}()
+				defer bar.Increment()
 
 				s, err := source.NewSource(ctx, sourceConf)
 				if err != nil {
@@ -435,14 +430,12 @@ func loadPackageDB(ctx context.Context, recipe *latestrecipe.Recipe, platform oc
 
 		err := g.Wait()
 
-		if bar != nil {
-			if err != nil {
-				bar.Abort(true)
-			} else {
-				bar.SetTotal(bar.Current(), true)
-			}
-			bar.Wait()
+		if err != nil {
+			bar.Abort(true)
+		} else {
+			bar.SetTotal(bar.Current(), true)
 		}
+		bar.Wait()
 
 		if err != nil {
 			return nil, time.Time{}, fmt.Errorf("failed to get components: %w", err)
@@ -455,28 +448,21 @@ func loadPackageDB(ctx context.Context, recipe *latestrecipe.Recipe, platform oc
 	{
 		g, ctx := errgroup.WithContext(ctx)
 
-		var bar *mpb.Bar
-		if progress != nil {
-			bar = progress.AddBar(int64(len(components)),
-				mpb.PrependDecorators(
-					decor.Name("Repository: "),
-					decor.CountersNoUnit("%d / %d"),
-				),
-				mpb.AppendDecorators(
-					decor.Percentage(),
-				),
-			)
-		}
+		bar := progress.AddBar(int64(len(components)),
+			mpb.PrependDecorators(
+				decor.Name("Repository: "),
+				decor.CountersNoUnit("%d / %d"),
+			),
+			mpb.AppendDecorators(
+				decor.Percentage(),
+			),
+		)
 
 		for _, component := range components {
 			component := component
 
 			g.Go(func() error {
-				defer func() {
-					if bar != nil {
-						bar.Increment()
-					}
-				}()
+				defer bar.Increment()
 
 				componentPackages, lastUpdated, err := component.Packages(ctx)
 				if err != nil {
@@ -495,14 +481,12 @@ func loadPackageDB(ctx context.Context, recipe *latestrecipe.Recipe, platform oc
 
 		err := g.Wait()
 
-		if bar != nil {
-			if err != nil {
-				bar.Abort(true)
-			} else {
-				bar.SetTotal(bar.Current(), true)
-			}
-			bar.Wait()
+		if err != nil {
+			bar.Abort(true)
+		} else {
+			bar.SetTotal(bar.Current(), true)
 		}
+		bar.Wait()
 
 		if err != nil {
 			return nil, time.Time{}, fmt.Errorf("failed to get packages: %w", err)
@@ -513,24 +497,23 @@ func loadPackageDB(ctx context.Context, recipe *latestrecipe.Recipe, platform oc
 }
 
 func downloadSelectedPackages(ctx context.Context, tempDir string, selectedDB *database.PackageDB) ([]string, error) {
-	var progress *mpb.Progress
-	if !slog.Default().Enabled(ctx, slog.LevelDebug) {
-		progress = mpb.NewWithContext(ctx)
-		defer progress.Shutdown()
+	var progressOutput io.Writer = os.Stdout
+	if slog.Default().Enabled(ctx, slog.LevelDebug) {
+		progressOutput = io.Discard
 	}
 
-	var bar *mpb.Bar
-	if progress != nil {
-		bar = progress.AddBar(int64(selectedDB.Len()),
-			mpb.PrependDecorators(
-				decor.Name("Downloading: "),
-				decor.CountersNoUnit("%d / %d"),
-			),
-			mpb.AppendDecorators(
-				decor.Percentage(),
-			),
-		)
-	}
+	progress := mpb.NewWithContext(ctx, mpb.WithOutput(progressOutput))
+	defer progress.Shutdown()
+
+	bar := progress.AddBar(int64(selectedDB.Len()),
+		mpb.PrependDecorators(
+			decor.Name("Downloading: "),
+			decor.CountersNoUnit("%d / %d"),
+		),
+		mpb.AppendDecorators(
+			decor.Percentage(),
+		),
+	)
 
 	g, ctx := errgroup.WithContext(ctx)
 	g.SetLimit(10)
@@ -540,11 +523,7 @@ func downloadSelectedPackages(ctx context.Context, tempDir string, selectedDB *d
 
 	_ = selectedDB.ForEach(func(pkg types.Package) error {
 		g.Go(func() error {
-			defer func() {
-				if bar != nil {
-					bar.Increment()
-				}
-			}()
+			defer bar.Increment()
 
 			var errs error
 			for _, pkgURL := range util.Shuffle(pkg.URLs) {
@@ -572,14 +551,12 @@ func downloadSelectedPackages(ctx context.Context, tempDir string, selectedDB *d
 
 	err := g.Wait()
 
-	if bar != nil {
-		if err != nil {
-			bar.Abort(true)
-		} else {
-			bar.SetTotal(bar.Current(), true)
-		}
-		bar.Wait()
+	if err != nil {
+		bar.Abort(true)
+	} else {
+		bar.SetTotal(bar.Current(), true)
 	}
+	bar.Wait()
 
 	if err != nil {
 		return nil, fmt.Errorf("failed to download packages: %w", err)

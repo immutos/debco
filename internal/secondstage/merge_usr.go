@@ -26,7 +26,7 @@ import (
 	cp "github.com/otiai10/copy"
 )
 
-// usrMergeDirectories is the comple list of directories that can be merged into /usr.
+// usrMergeDirectories is the complete list of directories that can be merged into /usr.
 var usrMergeDirectories = []string{"/bin", "/lib", "/lib32", "/lib64", "/libo32", "/libx32", "/sbin"}
 
 // MergeUsr merges the /usr directory into the root filesystem

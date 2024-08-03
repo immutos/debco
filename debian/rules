@@ -9,7 +9,7 @@ export VERSION ?= $(shell git describe --tags --abbrev=0)
 %:
 	# Some embedded assets need to be copied to the build directory.
 	mkdir -p _build/src/github.com/dpeckett/debco/internal/secondstage/slimify
-	cp -r internal/secondstage/slimify/embed _build/src/github.com/dpeckett/debco/internal/secondstage/slimify/embed
+	cp -r internal/secondstage/slimify/.slimify _build/src/github.com/dpeckett/debco/internal/secondstage/slimify/
 
 	dh $@ --builddirectory=_build --buildsystem=golang
 

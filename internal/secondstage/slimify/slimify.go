@@ -33,7 +33,7 @@ import (
 	"github.com/moby/patternmatcher"
 )
 
-//go:embed embed/.slimify
+//go:embed .slimify
 var dotSlimify []byte
 
 var excludedDirs = map[string]bool{

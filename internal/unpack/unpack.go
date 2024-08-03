@@ -42,28 +42,27 @@ import (
 )
 
 func Unpack(ctx context.Context, tempDir string, packagePaths []string) (string, []string, error) {
-	var progress *mpb.Progress
-	if !slog.Default().Enabled(ctx, slog.LevelDebug) {
-		progress = mpb.NewWithContext(ctx)
-		defer progress.Shutdown()
+	var progressOutput io.Writer = os.Stdout
+	if slog.Default().Enabled(ctx, slog.LevelDebug) {
+		progressOutput = io.Discard
 	}
+
+	progress := mpb.NewWithContext(ctx, mpb.WithOutput(progressOutput))
+	defer progress.Shutdown()
 
 	// Decompress the packages in parallel.
 	controlArchivePaths := make([]string, len(packagePaths))
 	dataArchivePaths := make([]string, len(packagePaths))
 	{
-		var bar *mpb.Bar
-		if progress != nil {
-			bar = progress.AddBar(int64(len(packagePaths)),
-				mpb.PrependDecorators(
-					decor.Name("Decompressing: "),
-					decor.CountersNoUnit("%d / %d"),
-				),
-				mpb.AppendDecorators(
-					decor.Percentage(),
-				),
-			)
-		}
+		bar := progress.AddBar(int64(len(packagePaths)),
+			mpb.PrependDecorators(
+				decor.Name("Decompressing: "),
+				decor.CountersNoUnit("%d / %d"),
+			),
+			mpb.AppendDecorators(
+				decor.Percentage(),
+			),
+		)
 
 		var g errgroup.Group
 		g.SetLimit(runtime.NumCPU())
@@ -73,11 +72,7 @@ func Unpack(ctx context.Context, tempDir string, packagePaths []string) (string,
 			packagePath := packagePath
 
 			g.Go(func() error {
-				defer func() {
-					if bar != nil {
-						bar.Increment()
-					}
-				}()
+				defer bar.Increment()
 
 				controlArchivePath, dataArchivePath, err := decompressPackage(tempDir, packagePath)
 				if err != nil {
@@ -93,14 +88,12 @@ func Unpack(ctx context.Context, tempDir string, packagePaths []string) (string,
 
 		err := g.Wait()
 
-		if bar != nil {
-			if err != nil {
-				bar.Abort(true)
-			} else {
-				bar.SetTotal(bar.Current(), true)
-			}
-			bar.Wait()
+		if err != nil {
+			bar.Abort(true)
+		} else {
+			bar.SetTotal(bar.Current(), true)
 		}
+		bar.Wait()
 
 		if err != nil {
 			return "", nil, fmt.Errorf("failed to decompress packages: %w", err)
@@ -118,18 +111,15 @@ func Unpack(ctx context.Context, tempDir string, packagePaths []string) (string,
 
 	var packages []types.Package
 	{
-		var bar *mpb.Bar
-		if progress != nil {
-			bar = progress.AddBar(int64(len(packagePaths)),
-				mpb.PrependDecorators(
-					decor.Name("Extracting: "),
-					decor.CountersNoUnit("%d / %d"),
-				),
-				mpb.AppendDecorators(
-					decor.Percentage(),
-				),
-			)
-		}
+		bar := progress.AddBar(int64(len(packagePaths)),
+			mpb.PrependDecorators(
+				decor.Name("Extracting: "),
+				decor.CountersNoUnit("%d / %d"),
+			),
+			mpb.AppendDecorators(
+				decor.Percentage(),
+			),
+		)
 
 		for i := range packagePaths {
 			slog.Debug("Extracting control archive",
@@ -137,10 +127,8 @@ func Unpack(ctx context.Context, tempDir string, packagePaths []string) (string,
 
 			controlArchiveFile, err := os.Open(controlArchivePaths[i])
 			if err != nil {
-				if bar != nil {
-					bar.Abort(true)
-					bar.Wait()
-				}
+				bar.Abort(true)
+				bar.Wait()
 
 				return "", nil, fmt.Errorf("failed to open control archive file: %w", err)
 			}
@@ -148,10 +136,8 @@ func Unpack(ctx context.Context, tempDir string, packagePaths []string) (string,
 			pkg, err := extractControlArchive(tw, controlArchiveFile)
 			_ = controlArchiveFile.Close()
 			if err != nil {
-				if bar != nil {
-					bar.Abort(true)
-					bar.Wait()
-				}
+				bar.Abort(true)
+				bar.Wait()
 
 				return "", nil, fmt.Errorf("failed to extract control archive: %w", err)
 			}
@@ -162,10 +148,8 @@ func Unpack(ctx context.Context, tempDir string, packagePaths []string) (string,
 			// Get the list of files in the data archive.
 			dataArchiveFile, err := os.Open(dataArchivePaths[i])
 			if err != nil {
-				if bar != nil {
-					bar.Abort(true)
-					bar.Wait()
-				}
+				bar.Abort(true)
+				bar.Wait()
 
 				return "", nil, fmt.Errorf("failed to open data archive file: %w", err)
 			}
@@ -173,10 +157,8 @@ func Unpack(ctx context.Context, tempDir string, packagePaths []string) (string,
 			filesList, err := getDataArchiveFileList(dataArchiveFile)
 			_ = dataArchiveFile.Close()
 			if err != nil {
-				if bar != nil {
-					bar.Abort(true)
-					bar.Wait()
-				}
+				bar.Abort(true)
+				bar.Wait()
 
 				return "", nil, fmt.Errorf("failed to get data archive file list: %w", err)
 			}
@@ -198,9 +180,7 @@ func Unpack(ctx context.Context, tempDir string, packagePaths []string) (string,
 				return "", nil, fmt.Errorf("failed to write files list to tar archive: %w", err)
 			}
 
-			if bar != nil {
-				bar.Increment()
-			}
+			bar.Increment()
 		}
 	}
 

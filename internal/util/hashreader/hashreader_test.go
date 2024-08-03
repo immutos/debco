@@ -23,8 +23,8 @@ import (
 	"io"
 	"testing"
 
-	"github.com/dpeckett/debco/internal/hashreader"
 	"github.com/dpeckett/debco/internal/testutil"
+	"github.com/dpeckett/debco/internal/util/hashreader"
 	"github.com/stretchr/testify/require"
 )
 

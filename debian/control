@@ -47,4 +47,4 @@ Architecture: any
 Depends: ${misc:Depends},
          ${shlibs:Depends}
 Built-Using: ${misc:Built-Using}
-Description: Probably the quickest, and easiest, way to create a Debian apt repository from a set of deb files. (program)
+Description: A declarative, BuildKit powered, Debian base system builder. (program)

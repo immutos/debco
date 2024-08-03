@@ -34,9 +34,9 @@ import (
 	"github.com/adrg/xdg"
 	"github.com/containerd/containerd/platforms"
 	"github.com/dpeckett/debco/internal/buildkit"
-	"github.com/dpeckett/debco/internal/diskcache"
 	"github.com/dpeckett/debco/internal/testutil"
 	"github.com/dpeckett/debco/internal/unpack"
+	"github.com/dpeckett/debco/internal/util/diskcache"
 	"github.com/gregjones/httpcache"
 	"github.com/stretchr/testify/require"
 )

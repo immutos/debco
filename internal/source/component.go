@@ -32,8 +32,8 @@ import (
 	"github.com/dpeckett/compressmagic"
 	"github.com/dpeckett/deb822"
 	"github.com/dpeckett/deb822/types/arch"
-	"github.com/dpeckett/debco/internal/hashreader"
 	"github.com/dpeckett/debco/internal/types"
+	"github.com/dpeckett/debco/internal/util/hashreader"
 )
 
 // Component represents a component of a Debian repository.

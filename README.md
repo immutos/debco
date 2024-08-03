@@ -11,7 +11,7 @@ Inspired by [apko](https://github.com/chainguard-dev/apko), [multistrap](https:/
 * Reproducible - run the same command, get the same image.
 * Secure - no need to trust a third party base image.
 * Fast - uses [BuildKit](https://docs.docker.com/build/buildkit/) for caching and parallelism.
-* Cross platform - build images on any platform that supports Docker.
+* Portable - build images on any platform that supports Docker.
 
 ## Installation
 

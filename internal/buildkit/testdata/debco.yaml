@@ -1,2 +1,3 @@
+# No second stage provisioning to perform.
 apiVersion: debco/v1alpha1
 kind: Recipe
