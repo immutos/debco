@@ -29,11 +29,11 @@ import (
 	"time"
 
 	"github.com/ProtonMail/go-crypto/openpgp"
-	"github.com/dpeckett/compressmagic"
 	"github.com/dpeckett/deb822"
 	"github.com/dpeckett/deb822/types/arch"
 	"github.com/dpeckett/debco/internal/types"
 	"github.com/dpeckett/debco/internal/util/hashreader"
+	"github.com/dpeckett/uncompr"
 )
 
 // Component represents a component of a Debian repository.
@@ -90,7 +90,7 @@ func (c *Component) Packages(ctx context.Context) ([]types.Package, time.Time, e
 
 		hr := hashreader.NewReader(resp.Body)
 
-		dr, err := compressmagic.NewReader(hr)
+		dr, err := uncompr.NewReader(hr)
 		if err != nil {
 			errs = errors.Join(errs, fmt.Errorf("failed to decompress %s file: %w", name, err))
 			continue

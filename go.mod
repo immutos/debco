@@ -10,9 +10,9 @@ require (
 	github.com/containerd/containerd v1.6.20
 	github.com/docker/docker v23.0.0-rc.1+incompatible
 	github.com/docker/go-connections v0.4.0
-	github.com/dpeckett/archivefs v0.4.4
-	github.com/dpeckett/compressmagic v0.3.3
-	github.com/dpeckett/deb822 v0.5.2
+	github.com/dpeckett/archivefs v0.10.2
+	github.com/dpeckett/deb822 v0.5.3
+	github.com/dpeckett/uncompr v0.5.0
 	github.com/google/btree v1.0.0
 	github.com/gregjones/httpcache v0.0.0-20190611155906-901d90724c79
 	github.com/moby/buildkit v0.8.4-0.20221020190723-eeb7b65ab7d6
@@ -59,7 +59,6 @@ require (
 	github.com/morikuni/aec v1.0.0 // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/opentracing/opentracing-go v1.2.0 // indirect
-	github.com/pierrec/lz4 v2.6.1+incompatible // indirect
 	github.com/pierrec/lz4/v4 v4.1.21 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect

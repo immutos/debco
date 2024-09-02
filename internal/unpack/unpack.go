@@ -33,9 +33,9 @@ import (
 
 	"github.com/dpeckett/archivefs/arfs"
 	"github.com/dpeckett/archivefs/tarfs"
-	"github.com/dpeckett/compressmagic"
 	"github.com/dpeckett/deb822"
 	"github.com/dpeckett/deb822/types"
+	"github.com/dpeckett/uncompr"
 	"github.com/vbauerster/mpb/v8"
 	"github.com/vbauerster/mpb/v8/decor"
 	"golang.org/x/sync/errgroup"
@@ -265,7 +265,7 @@ func decompressPackage(tempDir string, packagePath string) (string, string, erro
 		return "", "", fmt.Errorf("failed to open control archive: %w", err)
 	}
 
-	dr, err := compressmagic.NewReader(controlArchive)
+	dr, err := uncompr.NewReader(controlArchive)
 	if err != nil {
 		return "", "", fmt.Errorf("failed to decompress control archive: %w", err)
 	}
@@ -292,7 +292,7 @@ func decompressPackage(tempDir string, packagePath string) (string, string, erro
 		return "", "", fmt.Errorf("failed to open data archive: %w", err)
 	}
 
-	dr, err = compressmagic.NewReader(dataArchive)
+	dr, err = uncompr.NewReader(dataArchive)
 	if err != nil {
 		return "", "", fmt.Errorf("failed to decompress data archive: %w", err)
 	}

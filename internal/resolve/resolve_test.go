@@ -24,12 +24,12 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/dpeckett/compressmagic"
 	"github.com/dpeckett/deb822"
 	"github.com/dpeckett/debco/internal/database"
 	"github.com/dpeckett/debco/internal/resolve"
 	"github.com/dpeckett/debco/internal/testutil"
 	"github.com/dpeckett/debco/internal/types"
+	"github.com/dpeckett/uncompr"
 	"github.com/stretchr/testify/require"
 )
 
@@ -42,7 +42,7 @@ func TestResolve(t *testing.T) {
 		require.NoError(t, f.Close())
 	})
 
-	dr, err := compressmagic.NewReader(f)
+	dr, err := uncompr.NewReader(f)
 	require.NoError(t, err)
 	t.Cleanup(func() {
 		require.NoError(t, dr.Close())

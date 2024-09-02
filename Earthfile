@@ -91,7 +91,7 @@ package:
     golang-github-docker-docker-dev \
     golang-github-docker-go-connections-dev \
     golang-github-dpeckett-archivefs-dev \
-    golang-github-dpeckett-compressmagic-dev \
+    golang-github-dpeckett-uncompr-dev \
     golang-github-dpeckett-deb822-dev \
     golang-github-gofrs-flock-dev \
     golang-github-google-btree-dev \
@@ -99,22 +99,19 @@ package:
     golang-github-grpc-ecosystem-grpc-opentracing-dev \
     golang-github-jaguilar-vt100-dev=0.0~git20240719.6f69db9-1 \
     golang-github-moby-patternmatcher-dev \
-    golang-github-opencontainers-image-spec-dev=1.1.0~rc4-3~bpo12+1 \
+    golang-github-opencontainers-image-spec-dev=1.1.0-2~bpo12+1 \
     golang-github-otiai10-copy-dev \
     golang-github-pierrec-lz4-dev=4.1.18-1~bpo12+1 \
     golang-github-rogpeppe-go-internal-dev \
     golang-github-google-shlex-dev \
     golang-github-stretchr-testify-dev \
-    golang-github-tonistiigi-fsutil-dev=0.0~git20230630.36ef4d8-1~bpo12+1 \
+    golang-github-tonistiigi-fsutil-dev=0.0~git20240902.85aeae2-1 \
     golang-github-tonistiigi-units-dev \
     golang-github-urfave-cli-v2-dev \
     golang-github-vbauerster-mpb-dev=8.6.1-3~bpo12+1 \
     golang-golang-x-sync-dev \
     golang-golang-x-term-dev \
     golang-gopkg-yaml.v3-dev
-  # Patch an issue with Debian's golang-github-docker-docker-dev package.
-  COPY debian/patches /workspace/patches
-  RUN for p in /workspace/patches/*.patch; do patch -d /usr/share/gocode/src/ -p1 < $p; done
   RUN mkdir -p /workspace/debco
   WORKDIR /workspace/debco
   COPY . .
