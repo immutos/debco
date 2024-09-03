@@ -43,20 +43,20 @@ func TestUnpack(t *testing.T) {
 		filepath.Join(testutil.Root(), "testdata/debs/base-passwd_3.6.1_amd64.deb"),
 	}
 
-	dpkgConfArchivePath, dataArchivePaths, err := unpack.Unpack(ctx, tempDir, packagePaths)
+	dpkgDatabaseArchivePath, dataArchivePaths, err := unpack.Unpack(ctx, tempDir, packagePaths)
 	require.NoError(t, err)
 
 	require.Len(t, dataArchivePaths, 2)
 	require.Equal(t, "base-files_12.4+deb12u5_amd64_data.tar", filepath.Base(dataArchivePaths[0]))
 	require.Equal(t, "base-passwd_3.6.1_amd64_data.tar", filepath.Base(dataArchivePaths[1]))
 
-	dpkgConfArchiveFile, err := os.Open(dpkgConfArchivePath)
+	dpkgDatabaseArchiveFile, err := os.Open(dpkgDatabaseArchivePath)
 	require.NoError(t, err)
 	t.Cleanup(func() {
-		require.NoError(t, dpkgConfArchiveFile.Close())
+		require.NoError(t, dpkgDatabaseArchiveFile.Close())
 	})
 
-	tarFS, err := tarfs.Open(dpkgConfArchiveFile)
+	tarFS, err := tarfs.Open(dpkgDatabaseArchiveFile)
 	require.NoError(t, err)
 
 	var filesList []string

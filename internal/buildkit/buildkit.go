@@ -82,9 +82,9 @@ type PlatformBuildOptions struct {
 	Platform ocispecs.Platform
 	// BuildContextDir is the path to the build context directory.
 	BuildContextDir string
-	// DpkgConfArchivePath is the path to the dpkg configuration archive.
+	// DpkgDatabaseArchivePath is the path to the dpkg configuration archive.
 	// The path must be relative to the build context directory.
-	DpkgConfArchivePath string
+	DpkgDatabaseArchivePath string
 	// DataArchivePaths is a list of paths to package data archives.
 	// The paths must be relative to the build context directory.
 	DataArchivePaths []string
@@ -102,7 +102,7 @@ func (b *BuildKit) Build(ctx context.Context, opts BuildOptions) error {
 
 			buildContextKey := fmt.Sprintf("build-context-%s", strings.ReplaceAll(platformStr, "/", "-"))
 
-			dpkgConfArchiveRelPath, err := filepath.Rel(platformOpt.BuildContextDir, platformOpt.DpkgConfArchivePath)
+			dpkgDatabaseArchiveRelPath, err := filepath.Rel(platformOpt.BuildContextDir, platformOpt.DpkgDatabaseArchivePath)
 			if err != nil {
 				return nil, fmt.Errorf("failed to get relative path to dpkg configuration archive: %w", err)
 			}
@@ -113,7 +113,7 @@ func (b *BuildKit) Build(ctx context.Context, opts BuildOptions) error {
 				AddEnv("DEBIAN_FRONTEND", "noninteractive").
 				AddEnv("DEBCONF_NONINTERACTIVE_SEEN", "true").
 				AddEnv("PATH", "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin").
-				File(llb.Copy(llb.Local(buildContextKey), dpkgConfArchiveRelPath, "/", &llb.CopyInfo{AttemptUnpack: true}))
+				File(llb.Copy(llb.Local(buildContextKey), dpkgDatabaseArchiveRelPath, "/", &llb.CopyInfo{AttemptUnpack: true}))
 
 			for _, dataArchivePath := range platformOpt.DataArchivePaths {
 				dataArchiveRelPath, err := filepath.Rel(platformOpt.BuildContextDir, dataArchivePath)

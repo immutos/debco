@@ -20,6 +20,7 @@ package secondstage
 
 import (
 	"fmt"
+	"log/slog"
 	"os"
 	"path/filepath"
 
@@ -40,10 +41,14 @@ func MergeUsr() error {
 
 		// The directory is already usr merged.
 		if info, err := os.Lstat(dir); err == nil && info.Mode()&os.ModeSymlink != 0 {
+			slog.Info("Directory is already usr merged", slog.String("dir", dir))
 			continue
 		}
 
 		canonDir := filepath.Join("/usr", dir)
+
+		slog.Info("Merging into /usr", slog.String("dir", dir), slog.String("canonDir", canonDir))
+
 		if err := cp.Copy(dir, canonDir, cp.Options{OnSymlink: func(src string) cp.SymlinkAction {
 			return cp.Shallow
 		}}); err != nil {

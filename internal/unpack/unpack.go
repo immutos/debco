@@ -19,7 +19,6 @@
 package unpack
 
 import (
-	"archive/tar"
 	"bytes"
 	"context"
 	"fmt"
@@ -32,6 +31,7 @@ import (
 	"strings"
 
 	"github.com/dpeckett/archivefs/arfs"
+	"github.com/dpeckett/archivefs/memfs"
 	"github.com/dpeckett/archivefs/tarfs"
 	"github.com/dpeckett/deb822"
 	"github.com/dpeckett/deb822/types"
@@ -100,14 +100,10 @@ func Unpack(ctx context.Context, tempDir string, packagePaths []string) (string,
 		}
 	}
 
-	dpkgConfArchiveFile, err := os.Create(filepath.Join(tempDir, "dpkg-conf.tar"))
-	if err != nil {
-		return "", nil, fmt.Errorf("failed to create dpkg tar archive: %w", err)
+	dpkgDatabaseFS := memfs.New()
+	if err := dpkgDatabaseFS.MkdirAll("var/lib/dpkg/info", 0o755); err != nil {
+		return "", nil, fmt.Errorf("failed to create dpkg info directory: %w", err)
 	}
-	defer dpkgConfArchiveFile.Close()
-
-	tw := tar.NewWriter(dpkgConfArchiveFile)
-	defer tw.Close()
 
 	var packages []types.Package
 	{
@@ -133,7 +129,7 @@ func Unpack(ctx context.Context, tempDir string, packagePaths []string) (string,
 				return "", nil, fmt.Errorf("failed to open control archive file: %w", err)
 			}
 
-			pkg, err := extractControlArchive(tw, controlArchiveFile)
+			pkg, err := extractControlArchive(dpkgDatabaseFS, controlArchiveFile)
 			_ = controlArchiveFile.Close()
 			if err != nil {
 				bar.Abort(true)
@@ -163,21 +159,13 @@ func Unpack(ctx context.Context, tempDir string, packagePaths []string) (string,
 				return "", nil, fmt.Errorf("failed to get data archive file list: %w", err)
 			}
 
-			filesListContent := strings.NewReader(strings.Join(filesList, "\n") + "\n")
-
 			// Write the files list to the dpkg info directory.
-			hdr := &tar.Header{
-				Name: filepath.Join("var/lib/dpkg/info", fmt.Sprintf("%s.list", pkg.Name)),
-				Mode: 0o644,
-				Size: int64(filesListContent.Len()),
-			}
+			filesListPath := filepath.Join("var/lib/dpkg/info", fmt.Sprintf("%s.list", pkg.Name))
+			if err := dpkgDatabaseFS.WriteFile(filesListPath, []byte(strings.Join(filesList, "\n")+"\n"), 0o644); err != nil {
+				bar.Abort(true)
+				bar.Wait()
 
-			if err := tw.WriteHeader(hdr); err != nil {
-				return "", nil, fmt.Errorf("failed to write tar header: %w", err)
-			}
-
-			if _, err := io.Copy(tw, filesListContent); err != nil {
-				return "", nil, fmt.Errorf("failed to write files list to tar archive: %w", err)
+				return "", nil, fmt.Errorf("failed to write files list: %w", err)
 			}
 
 			bar.Increment()
@@ -190,21 +178,21 @@ func Unpack(ctx context.Context, tempDir string, packagePaths []string) (string,
 		return "", nil, fmt.Errorf("failed to marshal packages: %w", err)
 	}
 
-	hdr := &tar.Header{
-		Name: "var/lib/dpkg/status",
-		Size: int64(buf.Len()),
-		Mode: 0o644,
+	if err := dpkgDatabaseFS.WriteFile("var/lib/dpkg/status", buf.Bytes(), 0o644); err != nil {
+		return "", nil, fmt.Errorf("failed to write dpkg status file: %w", err)
 	}
 
-	if err := tw.WriteHeader(hdr); err != nil {
-		return "", nil, fmt.Errorf("failed to write tar header: %w", err)
+	dpkgDatabaseArchiveFile, err := os.Create(filepath.Join(tempDir, "dpkg.tar"))
+	if err != nil {
+		return "", nil, fmt.Errorf("failed to create dpkg database archive file: %w", err)
+	}
+	defer dpkgDatabaseArchiveFile.Close()
+
+	if err := tarfs.Create(dpkgDatabaseArchiveFile, dpkgDatabaseFS); err != nil {
+		return "", nil, fmt.Errorf("failed to create dpkg database archive: %w", err)
 	}
 
-	if _, err := io.Copy(tw, bytes.NewReader(buf.Bytes())); err != nil {
-		return "", nil, fmt.Errorf("failed to write packages to tar archive: %w", err)
-	}
-
-	return dpkgConfArchiveFile.Name(), dataArchivePaths, nil
+	return dpkgDatabaseArchiveFile.Name(), dataArchivePaths, nil
 }
 
 func decompressPackage(tempDir string, packagePath string) (string, string, error) {
@@ -311,13 +299,13 @@ func decompressPackage(tempDir string, packagePath string) (string, string, erro
 	return decompressedControlArchivePath, decompressedDataArchivePath, nil
 }
 
-func extractControlArchive(tw *tar.Writer, controlArchiveFile *os.File) (*types.Package, error) {
-	controlArchive, err := tarfs.Open(controlArchiveFile)
+func extractControlArchive(dpkgDatabaseFS *memfs.FS, controlArchiveFile *os.File) (*types.Package, error) {
+	controlFS, err := tarfs.Open(controlArchiveFile)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open control archive: %w", err)
 	}
 
-	controlFile, err := controlArchive.Open("control")
+	controlFile, err := controlFS.Open("control")
 	if err != nil {
 		return nil, fmt.Errorf("failed to open control file: %w", err)
 	}
@@ -334,45 +322,37 @@ func extractControlArchive(tw *tar.Writer, controlArchiveFile *os.File) (*types.
 		return nil, fmt.Errorf("failed to decode control file: %w", err)
 	}
 
-	// Walk the control archive.
-	err = fs.WalkDir(controlArchive, ".", func(path string, d fs.DirEntry, err error) error {
-		if err != nil {
-			return err
-		}
-		if path == "." || path == "control" {
-			return nil
+	files, err := controlFS.ReadDir(".")
+	if err != nil {
+		return nil, fmt.Errorf("failed to read control archive: %w", err)
+	}
+
+	// Iterate over the files in the control archive and add relevant files to the dpkg database.
+	for _, file := range files {
+		if file.Name() == "control" {
+			continue
 		}
 
-		// Open the file in the control archive.
-		f, err := controlArchive.Open(path)
+		f, err := controlFS.Open(file.Name())
 		if err != nil {
-			return fmt.Errorf("failed to open file %s in control archive: %w", path, err)
+			return nil, fmt.Errorf("failed to open file in control archive: %w", err)
 		}
-		defer f.Close()
+
+		content, err := io.ReadAll(f)
+		_ = f.Close()
+		if err != nil {
+			return nil, fmt.Errorf("failed to read file from control archive: %w", err)
+		}
 
 		fi, err := f.Stat()
 		if err != nil {
-			return fmt.Errorf("failed to stat file in control archive: %w", err)
+			return nil, fmt.Errorf("failed to get file info from control archive: %w", err)
 		}
 
-		hdr, err := tar.FileInfoHeader(fi, "")
-		if err != nil {
-			return fmt.Errorf("failed to create tar header: %w", err)
+		if err := dpkgDatabaseFS.WriteFile(filepath.Join("var/lib/dpkg/info", fmt.Sprintf("%s.%s", pkg.Name, file.Name())),
+			content, fi.Mode()); err != nil {
+			return nil, fmt.Errorf("failed to write file in control archive: %w", err)
 		}
-		hdr.Name = filepath.Join("var/lib/dpkg/info", fmt.Sprintf("%s.%s", pkg.Name, path))
-
-		if err := tw.WriteHeader(hdr); err != nil {
-			return fmt.Errorf("failed to write tar header: %w", err)
-		}
-
-		if _, err := io.Copy(tw, f); err != nil {
-			return fmt.Errorf("failed to write file content to tar archive: %w", err)
-		}
-
-		return nil
-	})
-	if err != nil {
-		return nil, fmt.Errorf("failed to walk control archive: %w", err)
 	}
 
 	return &pkg, nil
@@ -380,13 +360,13 @@ func extractControlArchive(tw *tar.Writer, controlArchiveFile *os.File) (*types.
 
 func getDataArchiveFileList(dataArchiveFile *os.File) ([]string, error) {
 	// Open the data archive as a tar archive.
-	dataArchive, err := tarfs.Open(dataArchiveFile)
+	dataFS, err := tarfs.Open(dataArchiveFile)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open data archive: %w", err)
 	}
 
 	var filesList []string
-	err = fs.WalkDir(dataArchive, ".", func(path string, d fs.DirEntry, err error) error {
+	err = fs.WalkDir(dataFS, ".", func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}

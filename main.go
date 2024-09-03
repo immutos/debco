@@ -333,16 +333,16 @@ func main() {
 
 						slog.Info("Unpacking packages")
 
-						dpkgConfArchivePath, dataArchivePaths, err := unpack.Unpack(c.Context, platformTempDir, packagePaths)
+						dpkgDatabaseArchivePath, dataArchivePaths, err := unpack.Unpack(c.Context, platformTempDir, packagePaths)
 						if err != nil {
 							return err
 						}
 
 						buildOpts.PlatformOpts = append(buildOpts.PlatformOpts, buildkit.PlatformBuildOptions{
-							Platform:            platform,
-							BuildContextDir:     platformTempDir,
-							DpkgConfArchivePath: dpkgConfArchivePath,
-							DataArchivePaths:    dataArchivePaths,
+							Platform:                platform,
+							BuildContextDir:         platformTempDir,
+							DpkgDatabaseArchivePath: dpkgDatabaseArchivePath,
+							DataArchivePaths:        dataArchivePaths,
 						})
 					}
 

@@ -10,7 +10,7 @@ require (
 	github.com/containerd/containerd v1.6.20
 	github.com/docker/docker v23.0.0-rc.1+incompatible
 	github.com/docker/go-connections v0.4.0
-	github.com/dpeckett/archivefs v0.10.2
+	github.com/dpeckett/archivefs v0.11.0
 	github.com/dpeckett/deb822 v0.5.3
 	github.com/dpeckett/telemetry v0.1.2
 	github.com/dpeckett/uncompr v0.5.0
