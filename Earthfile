@@ -91,8 +91,9 @@ package:
     golang-github-docker-docker-dev \
     golang-github-docker-go-connections-dev \
     golang-github-dpeckett-archivefs-dev \
-    golang-github-dpeckett-uncompr-dev \
     golang-github-dpeckett-deb822-dev \
+    golang-github-dpeckett-telemetry-dev \
+    golang-github-dpeckett-uncompr-dev \
     golang-github-gofrs-flock-dev \
     golang-github-google-btree-dev \
     golang-github-gregjones-httpcache-dev \

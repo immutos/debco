@@ -50,6 +50,8 @@ import (
 	"github.com/dpeckett/debco/internal/util"
 	"github.com/dpeckett/debco/internal/util/diskcache"
 	"github.com/dpeckett/debco/internal/util/hashreader"
+	"github.com/dpeckett/telemetry"
+	"github.com/dpeckett/telemetry/v1alpha1"
 	"github.com/gregjones/httpcache"
 	ocispecs "github.com/opencontainers/image-spec/specs-go/v1"
 	"github.com/urfave/cli/v2"
@@ -116,6 +118,53 @@ func main() {
 		return nil
 	}
 
+	// Collect anonymized usage statistics.
+	var telemetryReporter *telemetry.Reporter
+
+	initTelemetry := func(c *cli.Context) error {
+		telemetryReporter = telemetry.NewReporter(c.Context, slog.Default(), telemetry.Configuration{
+			BaseURL: constants.TelemetryURL,
+			Tags:    []string{"debco"},
+		})
+
+		// Some basic system information.
+		info := map[string]string{
+			"os":      runtime.GOOS,
+			"arch":    runtime.GOARCH,
+			"num_cpu": fmt.Sprintf("%d", runtime.NumCPU()),
+			"version": constants.Version,
+		}
+
+		telemetryReporter.ReportEvent(&v1alpha1.TelemetryEvent{
+			Kind:   v1alpha1.TelemetryEventKindInfo,
+			Name:   "ApplicationStart",
+			Values: info,
+		})
+
+		return nil
+	}
+
+	shutdownTelemetry := func(c *cli.Context) error {
+		if telemetryReporter == nil {
+			return nil
+		}
+
+		telemetryReporter.ReportEvent(&v1alpha1.TelemetryEvent{
+			Kind: v1alpha1.TelemetryEventKindInfo,
+			Name: "ApplicationStop",
+		})
+
+		// Don't want to block the shutdown of the application for too long.
+		ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+		defer cancel()
+
+		if err := telemetryReporter.Shutdown(ctx); err != nil {
+			slog.Error("Failed to close telemetry reporter", slog.Any("error", err))
+		}
+
+		return nil
+	}
+
 	app := &cli.App{
 		Name:    "debco",
 		Usage:   "A declarative Debian base system builder",
@@ -154,7 +203,8 @@ func main() {
 						Usage: "Enable development mode",
 					},
 				}, persistentFlags...),
-				Before: util.BeforeAll(initLogger, initCacheDir, initStateDir),
+				Before: util.BeforeAll(initLogger, initCacheDir, initStateDir, initTelemetry),
+				After:  shutdownTelemetry,
 				Action: func(c *cli.Context) error {
 					// Cache all HTTP responses on disk.
 					cache, err := diskcache.NewDiskCache(c.String("cache-dir"), "http")

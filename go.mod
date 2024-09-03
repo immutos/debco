@@ -12,6 +12,7 @@ require (
 	github.com/docker/go-connections v0.4.0
 	github.com/dpeckett/archivefs v0.10.2
 	github.com/dpeckett/deb822 v0.5.3
+	github.com/dpeckett/telemetry v0.1.2
 	github.com/dpeckett/uncompr v0.5.0
 	github.com/google/btree v1.0.0
 	github.com/gregjones/httpcache v0.0.0-20190611155906-901d90724c79

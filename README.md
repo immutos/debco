@@ -81,6 +81,13 @@ own base images using the `debco build` command.
 docker run --rm -it ghcr.io/dpeckett/debco/debian:bookworm-ultraslim sh
 ```
 
+## Telemetry
+
+By default debco gathers anonymous crash and usage statistics. This anonymized
+data is processed on our servers within the EU and is not shared with third
+parties. You can opt out of telemetry by setting the `DO_NOT_TRACK=1`
+environment variable.
+
 ## Limitations
 
 * [Debian Bookworm](https://www.debian.org/releases/bookworm/) and newer.

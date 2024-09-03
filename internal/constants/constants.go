@@ -25,6 +25,8 @@ var (
 	// the second stage debco binary for bootstrapping the system.
 	UpstreamAPTURL      = "https://apt.pecke.tt"
 	UpstreamAPTSignedBy = "https://apt.pecke.tt/signing_key.asc"
+	// TelemetryURL is the URL to send anonymized telemetry data to.
+	TelemetryURL = "https://telemetry.pecke.tt"
 	// Version will be populated during build time.
 	Version = "dev"
 )
