@@ -1,5 +1,6 @@
 VERSION 0.8
 FROM golang:1.22-bookworm
+ENV DO_NOT_TRACK=1
 WORKDIR /workspace
 
 all:
