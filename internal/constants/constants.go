@@ -23,8 +23,8 @@ var (
 	BuildKitImage = "docker.io/moby/buildkit:v0.13.2"
 	// During the building process we use the upstream apt repository to fetch
 	// the second stage debco binary for bootstrapping the system.
-	UpstreamAPTURL      = "https://apt.pecke.tt"
-	UpstreamAPTSignedBy = "https://apt.pecke.tt/signing_key.asc"
+	UpstreamAPTURL      = "https://apt.dpeckett.dev"
+	UpstreamAPTSignedBy = "https://apt.dpeckett.dev/signing_key.asc"
 	// TelemetryURL is the URL to send anonymized telemetry data to.
 	TelemetryURL = "https://telemetry.pecke.tt"
 	// Version will be populated during build time.
