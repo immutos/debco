@@ -26,7 +26,7 @@ var (
 	UpstreamAPTURL      = "https://apt.dpeckett.dev"
 	UpstreamAPTSignedBy = "https://apt.dpeckett.dev/signing_key.asc"
 	// TelemetryURL is the URL to send anonymized telemetry data to.
-	TelemetryURL = "https://telemetry.pecke.tt"
+	TelemetryURL = "https://telemetry.dpeckett.dev"
 	// Version will be populated during build time.
 	Version = "dev"
 )
