@@ -16,13 +16,8 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package constants
+package util
 
-var (
-	// BuildKitImage is the image used for the BuildKit daemon.
-	BuildKitImage = "docker.io/moby/buildkit:v0.13.2"
-	// TelemetryURL is the URL to send anonymized telemetry data to.
-	TelemetryURL = "https://telemetry.dpeckett.dev"
-	// Version will be populated during build time.
-	Version = "dev"
-)
+func PointerTo[T any](v T) *T {
+	return &v
+}

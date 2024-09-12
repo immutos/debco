@@ -28,6 +28,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/dpeckett/debco/internal/util"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -46,7 +47,7 @@ var (
 
 type User struct {
 	Name     string
-	UID      uint
+	UID      *uint
 	Groups   []string
 	HomeDir  string
 	Shell    string
@@ -76,7 +77,7 @@ func CreateOrUpdateUser(user User) error {
 			var found bool
 			for _, grp := range groups {
 				if grp.Name == groupName {
-					gid = grp.GID
+					gid = *grp.GID
 					found = true
 					break
 				}
@@ -94,7 +95,7 @@ func CreateOrUpdateUser(user User) error {
 		return fmt.Errorf("failed to lookup primary group: %w", err)
 	}
 
-	if user.UID == 0 {
+	if user.UID == nil {
 		var err error
 		user.UID, err = getNextFreeUID(user.System)
 		if err != nil {
@@ -102,7 +103,7 @@ func CreateOrUpdateUser(user User) error {
 		}
 	}
 
-	if err := updatePasswdFile(user, primaryGroup.GID); err != nil {
+	if err := updatePasswdFile(user, *primaryGroup.GID); err != nil {
 		return fmt.Errorf("failed to update passwd: %w", err)
 	}
 
@@ -126,10 +127,10 @@ func CreateOrUpdateUser(user User) error {
 	return nil
 }
 
-func getNextFreeUID(system bool) (uint, error) {
+func getNextFreeUID(system bool) (*uint, error) {
 	users, err := loadUsers()
 	if err != nil {
-		return 0, fmt.Errorf("failed to parse passwd file: %w", err)
+		return nil, fmt.Errorf("failed to parse passwd file: %w", err)
 	}
 
 	minUID := userUIDMin
@@ -139,12 +140,11 @@ func getNextFreeUID(system bool) (uint, error) {
 
 	for uid := minUID; uid <= userUIDMax; uid++ {
 		if _, exists := users[uid]; !exists {
-			return uid, nil
+			return &uid, nil
 		}
 	}
 
-	return 0, errors.New("no available UID")
-
+	return nil, errors.New("no available UID")
 }
 
 func loadUsers() (map[uint]User, error) {
@@ -184,7 +184,7 @@ func loadUsers() (map[uint]User, error) {
 
 		users[uint(uid)] = User{
 			Name:    fields[0],
-			UID:     uint(uid),
+			UID:     util.PointerTo(uint(uid)),
 			HomeDir: fields[5],
 			Shell:   fields[6],
 		}
@@ -195,7 +195,7 @@ func loadUsers() (map[uint]User, error) {
 
 func updatePasswdFile(user User, primaryGroupID uint) error {
 	updateFunc := func(lr *lineReader) (string, error) {
-		updatedEntry := fmt.Sprintf("%s:x:%d:%d::%s:%s", user.Name, user.UID, primaryGroupID, user.HomeDir, user.Shell)
+		updatedEntry := fmt.Sprintf("%s:x:%d:%d::%s:%s", user.Name, *user.UID, primaryGroupID, user.HomeDir, user.Shell)
 		found := false
 
 		var sb strings.Builder

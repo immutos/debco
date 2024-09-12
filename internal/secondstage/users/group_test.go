@@ -24,6 +24,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/dpeckett/debco/internal/util"
 	cp "github.com/otiai10/copy"
 	"github.com/stretchr/testify/require"
 )
@@ -49,7 +50,7 @@ func TestCreateOrUpdateGroup(t *testing.T) {
 	// Update an existing group.
 	require.NoError(t, CreateOrUpdateGroup(Group{
 		Name:    "sudo",
-		GID:     27,
+		GID:     util.PointerTo(uint(27)),
 		Members: []string{"user1", "user2"},
 		System:  true,
 	}))

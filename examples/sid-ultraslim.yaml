@@ -11,6 +11,11 @@ options:
 
 # Where to get the packages from.
 sources:
+  - url: https://apt.dpeckett.dev
+    signedBy: https://apt.dpeckett.dev/signing_key.asc
+    distribution: bookworm # debco is statically linked so this is fine.
+    components:
+      - stable
   - url: https://deb.debian.org/debian
     signedBy: https://ftp-master.debian.org/keys/archive-key-12.asc
     distribution: sid

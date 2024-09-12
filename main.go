@@ -425,18 +425,6 @@ func loadPackageDB(ctx context.Context, recipe *latestrecipe.Recipe, platform oc
 	{
 		sourceConfs := append([]latestrecipe.SourceConfig{}, recipe.Sources...)
 
-		if !(recipe.Options != nil && recipe.Options.OmitUpstreamAPT) {
-			sourceConfs = append([]latestrecipe.SourceConfig{
-				{
-					URL:      constants.UpstreamAPTURL,
-					SignedBy: constants.UpstreamAPTSignedBy,
-					// Given debco is only linked to libc, this should be "fine".
-					Distribution: "bookworm",
-					Components:   []string{"stable"},
-				},
-			}, sourceConfs...)
-		}
-
 		g, ctx := errgroup.WithContext(ctx)
 
 		bar := progress.AddBar(int64(len(sourceConfs)),

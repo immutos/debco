@@ -27,6 +27,8 @@ import (
 	"os"
 	"strconv"
 	"strings"
+
+	"github.com/dpeckett/debco/internal/util"
 )
 
 const (
@@ -44,7 +46,7 @@ var (
 
 type Group struct {
 	Name    string
-	GID     uint
+	GID     *uint
 	System  bool
 	Members []string
 }
@@ -55,7 +57,7 @@ func CreateOrUpdateGroup(group Group) error {
 		return fmt.Errorf("invalid group name %q", group.Name)
 	}
 
-	if group.GID == 0 {
+	if group.GID == nil {
 		var err error
 		group.GID, err = getNextFreeGID(group.System)
 		if err != nil {
@@ -74,10 +76,10 @@ func CreateOrUpdateGroup(group Group) error {
 	return nil
 }
 
-func getNextFreeGID(system bool) (uint, error) {
+func getNextFreeGID(system bool) (*uint, error) {
 	groups, err := loadGroups()
 	if err != nil {
-		return 0, fmt.Errorf("failed to parse group file: %w", err)
+		return nil, fmt.Errorf("failed to parse group file: %w", err)
 	}
 
 	minGID := userGIDMin
@@ -87,11 +89,11 @@ func getNextFreeGID(system bool) (uint, error) {
 
 	for gid := minGID; gid <= userGIDMax; gid++ {
 		if _, exists := groups[gid]; !exists {
-			return gid, nil
+			return &gid, nil
 		}
 	}
 
-	return 0, errors.New("no available GID")
+	return nil, errors.New("no available GID")
 }
 
 func loadGroups() (map[uint]Group, error) {
@@ -136,7 +138,7 @@ func loadGroups() (map[uint]Group, error) {
 
 		groups[uint(gid)] = Group{
 			Name:    fields[0],
-			GID:     uint(gid),
+			GID:     util.PointerTo(uint(gid)),
 			System:  uint(gid) < userGIDMin,
 			Members: members,
 		}
@@ -147,7 +149,7 @@ func loadGroups() (map[uint]Group, error) {
 
 func updateGroupFile(group Group) error {
 	updateFunc := func(lr *lineReader) (string, error) {
-		updatedEntry := fmt.Sprintf("%s:x:%d:%s", group.Name, group.GID, strings.Join(deduplicate(group.Members), ","))
+		updatedEntry := fmt.Sprintf("%s:x:%d:%s", group.Name, *group.GID, strings.Join(deduplicate(group.Members), ","))
 		found := false
 
 		var sb strings.Builder

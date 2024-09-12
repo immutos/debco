@@ -47,10 +47,6 @@ type OptionsConfig struct {
 	// OmitRequired specifies whether to omit priority required packages from the installation.
 	// By default, any packages marked as priority required will be installed.
 	OmitRequired bool `yaml:"omitRequired,omitempty"`
-	// OmitUpstreamAPT specifies whether to omit the upstream apt repository
-	// (used for second stage debco installation) from the build process. If
-	// omitted, you will need to provide your own debco binary for bootstrapping.
-	OmitUpstreamAPT bool `yaml:"omitUpstreamAPT,omitempty"`
 	// Slimify specifies whether to slimify the image by removing unnecessary files.
 	Slimify bool `yaml:"slimify,omitempty"`
 }
@@ -82,7 +78,7 @@ type GroupConfig struct {
 	// Name is the name of the group.
 	Name string `yaml:"name"`
 	// GID is the group ID to use for the group.
-	GID uint `yaml:"gid,omitempty"`
+	GID *uint `yaml:"gid,omitempty"`
 	// Members is a list of users to add to the group.
 	Members []string `yaml:"members,omitempty"`
 	// System specifies whether the group is a system group.
@@ -94,7 +90,7 @@ type UserConfig struct {
 	// Name is the name of the user.
 	Name string `yaml:"name"`
 	// UID is the user ID to use for the user.
-	UID uint `yaml:"uid,omitempty"`
+	UID *uint `yaml:"uid,omitempty"`
 	// Groups is a list of groups to add the user to.
 	// The first group in the list will be treated as the users primary group.
 	Groups []string `yaml:"groups,omitempty"`
