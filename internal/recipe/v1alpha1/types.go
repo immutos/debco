@@ -21,7 +21,7 @@ package v1alpha1
 import (
 	"fmt"
 
-	"github.com/dpeckett/debco/internal/recipe/types"
+	"github.com/immutos/debco/internal/recipe/types"
 )
 
 const APIVersion = "debco/v1alpha1"

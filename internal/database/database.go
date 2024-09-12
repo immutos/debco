@@ -23,7 +23,7 @@ import (
 
 	debtypes "github.com/dpeckett/deb822/types"
 	"github.com/dpeckett/deb822/types/version"
-	"github.com/dpeckett/debco/internal/types"
+	"github.com/immutos/debco/internal/types"
 
 	"github.com/google/btree"
 )

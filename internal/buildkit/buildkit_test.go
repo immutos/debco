@@ -35,11 +35,11 @@ import (
 
 	"github.com/adrg/xdg"
 	"github.com/containerd/containerd/platforms"
-	"github.com/dpeckett/debco/internal/buildkit"
-	"github.com/dpeckett/debco/internal/testutil"
-	"github.com/dpeckett/debco/internal/unpack"
-	"github.com/dpeckett/debco/internal/util/diskcache"
 	"github.com/gregjones/httpcache"
+	"github.com/immutos/debco/internal/buildkit"
+	"github.com/immutos/debco/internal/testutil"
+	"github.com/immutos/debco/internal/unpack"
+	"github.com/immutos/debco/internal/util/diskcache"
 	"github.com/stretchr/testify/require"
 )
 

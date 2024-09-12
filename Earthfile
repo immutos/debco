@@ -24,7 +24,7 @@ build:
   RUN go mod download
   COPY . .
   ARG VERSION=dev
-  RUN CGO_ENABLED=0 go build --ldflags "-s -X 'github.com/dpeckett/debco/internal/constants.Version=${VERSION}'" -o debco main.go
+  RUN CGO_ENABLED=0 go build --ldflags "-s -X 'github.com/immutos/debco/internal/constants.Version=${VERSION}'" -o debco main.go
   SAVE ARTIFACT ./debco AS LOCAL dist/debco-${GOOS}-${GOARCH}
 
 tidy:
@@ -57,7 +57,7 @@ docker-push:
   RUN --secret GITHUB_TOKEN=gh_token (echo ${GITHUB_TOKEN} | docker login ghcr.io -u USERNAME --password-stdin)
   COPY (+docker/bookworm-ultraslim.tar --PLATFORM=linux/amd64,linux/arm64) ./
   RUN skopeo copy --multi-arch all oci-archive:bookworm-ultraslim.tar \
-      docker://ghcr.io/dpeckett/debco/debian:bookworm-ultraslim
+      docker://ghcr.io/immutos/debco/debian:bookworm-ultraslim
 
 docker:
   FROM +tools
@@ -67,7 +67,7 @@ docker:
   WITH DOCKER
     RUN debco build -f examples/bookworm-ultraslim.yaml \
       -o bookworm-ultraslim.tar -p ${PLATFORM} \
-      -t ghcr.io/dpeckett/debco/debian:bookworm-ultraslim \
+      -t ghcr.io/immutos/debco/debian:bookworm-ultraslim \
       --dev
   END
   SAVE ARTIFACT ./bookworm-ultraslim.tar AS LOCAL dist/bookworm-ultraslim.tar

@@ -22,8 +22,8 @@ import (
 	"fmt"
 	"io"
 
-	recipetypes "github.com/dpeckett/debco/internal/recipe/types"
-	latestrecipe "github.com/dpeckett/debco/internal/recipe/v1alpha1"
+	recipetypes "github.com/immutos/debco/internal/recipe/types"
+	latestrecipe "github.com/immutos/debco/internal/recipe/v1alpha1"
 	"gopkg.in/yaml.v3"
 )
 

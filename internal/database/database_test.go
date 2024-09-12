@@ -24,9 +24,9 @@ import (
 	debtypes "github.com/dpeckett/deb822/types"
 	"github.com/dpeckett/deb822/types/dependency"
 	"github.com/dpeckett/deb822/types/version"
-	"github.com/dpeckett/debco/internal/database"
-	"github.com/dpeckett/debco/internal/testutil"
-	"github.com/dpeckett/debco/internal/types"
+	"github.com/immutos/debco/internal/database"
+	"github.com/immutos/debco/internal/testutil"
+	"github.com/immutos/debco/internal/types"
 	"github.com/stretchr/testify/require"
 )
 

@@ -74,4 +74,4 @@ container:
     org.opencontainers.image.title: "Debian Bookworm UltraSlim"
     org.opencontainers.image.description: "A very minimal Debian Bookworm image"
     org.opencontainers.image.authors: "Damian Peckett <damian@pecke.tt>"
-    org.opencontainers.image.source: "https://github.com/dpeckett/debco"
+    org.opencontainers.image.source: "https://github.com/immutos/debco"

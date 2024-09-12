@@ -25,8 +25,8 @@ import (
 
 	"github.com/dpeckett/deb822/types/dependency"
 	"github.com/dpeckett/deb822/types/version"
-	"github.com/dpeckett/debco/internal/database"
-	"github.com/dpeckett/debco/internal/types"
+	"github.com/immutos/debco/internal/database"
+	"github.com/immutos/debco/internal/types"
 )
 
 // Resolve resolves the dependencies of a list of packages, specified as a list

@@ -70,4 +70,4 @@ container:
     org.opencontainers.image.title: "Debian Sid UltraSlim"
     org.opencontainers.image.description: "A very minimal Debian Sid image"
     org.opencontainers.image.authors: "Damian Peckett <damian@pecke.tt>"
-    org.opencontainers.image.source: "https://github.com/dpeckett/debco"
+    org.opencontainers.image.source: "https://github.com/immutos/debco"

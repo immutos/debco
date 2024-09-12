@@ -38,7 +38,7 @@ import (
 	dockerclient "github.com/docker/docker/client"
 	"github.com/docker/docker/pkg/jsonmessage"
 	"github.com/docker/go-connections/nat"
-	"github.com/dpeckett/debco/internal/constants"
+	"github.com/immutos/debco/internal/constants"
 	"golang.org/x/term"
 )
 

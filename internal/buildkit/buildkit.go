@@ -36,7 +36,7 @@ import (
 	"github.com/moby/buildkit/client"
 	"github.com/moby/buildkit/client/llb"
 
-	"github.com/dpeckett/debco/internal/buildkit/exptypes"
+	"github.com/immutos/debco/internal/buildkit/exptypes"
 	gateway "github.com/moby/buildkit/frontend/gateway/client"
 	"github.com/moby/buildkit/identity"
 	"github.com/moby/buildkit/session"

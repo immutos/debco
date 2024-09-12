@@ -31,9 +31,9 @@ import (
 	"github.com/ProtonMail/go-crypto/openpgp"
 	"github.com/dpeckett/deb822"
 	"github.com/dpeckett/deb822/types/arch"
-	"github.com/dpeckett/debco/internal/types"
-	"github.com/dpeckett/debco/internal/util/hashreader"
 	"github.com/dpeckett/uncompr"
+	"github.com/immutos/debco/internal/types"
+	"github.com/immutos/debco/internal/util/hashreader"
 )
 
 // Component represents a component of a Debian repository.

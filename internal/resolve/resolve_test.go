@@ -25,11 +25,11 @@ import (
 	"testing"
 
 	"github.com/dpeckett/deb822"
-	"github.com/dpeckett/debco/internal/database"
-	"github.com/dpeckett/debco/internal/resolve"
-	"github.com/dpeckett/debco/internal/testutil"
-	"github.com/dpeckett/debco/internal/types"
 	"github.com/dpeckett/uncompr"
+	"github.com/immutos/debco/internal/database"
+	"github.com/immutos/debco/internal/resolve"
+	"github.com/immutos/debco/internal/testutil"
+	"github.com/immutos/debco/internal/types"
 	"github.com/stretchr/testify/require"
 )
 

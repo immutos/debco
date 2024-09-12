@@ -32,8 +32,8 @@ import (
 	"github.com/dpeckett/deb822"
 	"github.com/dpeckett/deb822/types"
 	"github.com/dpeckett/deb822/types/arch"
-	"github.com/dpeckett/debco/internal/keyring"
-	latestrecipe "github.com/dpeckett/debco/internal/recipe/v1alpha1"
+	"github.com/immutos/debco/internal/keyring"
+	latestrecipe "github.com/immutos/debco/internal/recipe/v1alpha1"
 )
 
 const defaultDistribution = "stable"

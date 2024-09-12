@@ -24,7 +24,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/dpeckett/debco/internal/util"
+	"github.com/immutos/debco/internal/util"
 	cp "github.com/otiai10/copy"
 	"github.com/stretchr/testify/require"
 )

@@ -24,9 +24,9 @@ import (
 	"log/slog"
 	"os"
 
-	latestrecipe "github.com/dpeckett/debco/internal/recipe/v1alpha1"
-	"github.com/dpeckett/debco/internal/secondstage/slimify"
-	"github.com/dpeckett/debco/internal/secondstage/users"
+	latestrecipe "github.com/immutos/debco/internal/recipe/v1alpha1"
+	"github.com/immutos/debco/internal/secondstage/slimify"
+	"github.com/immutos/debco/internal/secondstage/users"
 )
 
 func Provision(ctx context.Context, recipe *latestrecipe.Recipe) error {

@@ -21,8 +21,8 @@ package diskcache_test
 import (
 	"testing"
 
-	"github.com/dpeckett/debco/internal/testutil"
-	"github.com/dpeckett/debco/internal/util/diskcache"
+	"github.com/immutos/debco/internal/testutil"
+	"github.com/immutos/debco/internal/util/diskcache"
 	"github.com/stretchr/testify/require"
 )
 

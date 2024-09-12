@@ -37,10 +37,10 @@ Build-Depends: debhelper-compat (= 13),
                golang-gopkg-yaml.v3-dev
 Testsuite: autopkgtest-pkg-go
 Standards-Version: 4.6.2
-Vcs-Browser: https://github.com/dpeckett/debco
-Vcs-Git: https://github.com/dpeckett/debco.git
-Homepage: https://github.com/dpeckett/debco
-XS-Go-Import-Path: github.com/dpeckett/debco
+Vcs-Browser: https://github.com/immutos/debco
+Vcs-Git: https://github.com/immutos/debco.git
+Homepage: https://github.com/immutos/debco
+XS-Go-Import-Path: github.com/immutos/debco
 
 Package: debco
 Section: utils

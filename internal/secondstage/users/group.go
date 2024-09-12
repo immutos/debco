@@ -28,7 +28,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/dpeckett/debco/internal/util"
+	"github.com/immutos/debco/internal/util"
 )
 
 const (

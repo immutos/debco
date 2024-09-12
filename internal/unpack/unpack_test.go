@@ -26,8 +26,8 @@ import (
 	"testing"
 
 	"github.com/dpeckett/archivefs/tarfs"
-	"github.com/dpeckett/debco/internal/testutil"
-	"github.com/dpeckett/debco/internal/unpack"
+	"github.com/immutos/debco/internal/testutil"
+	"github.com/immutos/debco/internal/unpack"
 	"github.com/stretchr/testify/require"
 )
 

@@ -28,9 +28,9 @@ import (
 	"time"
 
 	"github.com/dpeckett/deb822/types/arch"
-	latestrecipe "github.com/dpeckett/debco/internal/recipe/v1alpha1"
-	"github.com/dpeckett/debco/internal/source"
-	"github.com/dpeckett/debco/internal/testutil"
+	latestrecipe "github.com/immutos/debco/internal/recipe/v1alpha1"
+	"github.com/immutos/debco/internal/source"
+	"github.com/immutos/debco/internal/testutil"
 	"github.com/stretchr/testify/require"
 )
 

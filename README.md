@@ -32,7 +32,7 @@ sudo apt install debco
 
 Download statically linked binaries from the GitHub releases page: 
 
-[Latest Release](https://github.com/dpeckett/debco/releases/latest)
+[Latest Release](https://github.com/immutos/debco/releases/latest)
 
 ## Usage
 
@@ -73,7 +73,7 @@ This image is intended for experimentation purposes only. You should build your
 own base images using the `debco build` command.
 
 ```shell
-docker run --rm -it ghcr.io/dpeckett/debco/debian:bookworm-ultraslim sh
+docker run --rm -it ghcr.io/immutos/debco/debian:bookworm-ultraslim sh
 ```
 
 ## Telemetry

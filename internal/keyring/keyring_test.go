@@ -23,8 +23,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/dpeckett/debco/internal/keyring"
-	"github.com/dpeckett/debco/internal/testutil"
+	"github.com/immutos/debco/internal/keyring"
+	"github.com/immutos/debco/internal/testutil"
 	"github.com/stretchr/testify/require"
 )
 
