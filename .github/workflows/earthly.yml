@@ -60,6 +60,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     
     - name: Push Image
-      run: earthly -P --secret gh_token=$GITHUB_TOKEN +docker-push
+      run: earthly -P --secret registry_pw=$REGISTRY_PASSWORD +docker-push
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
