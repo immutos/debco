@@ -56,11 +56,11 @@ docker-push:
   COPY +skopeo/skopeo /usr/local/bin/skopeo
   RUN --secret REGISTRY_PASSWORD=registry_pw (echo ${REGISTRY_PASSWORD} | docker login registry.dpeckett.dev -u github-actions --password-stdin)
   COPY (+docker/bookworm-ultraslim.tar --PLATFORM=linux/amd64,linux/arm64) ./
-  COPY (+docker/bookwork-ultraslim-bootable.tar --PLATFORM=linux/amd64,linux/arm64) ./
+  COPY (+docker/bookworm-ultraslim-bootable.tar --PLATFORM=linux/amd64,linux/arm64) ./
   RUN skopeo copy --multi-arch all oci-archive:bookworm-ultraslim.tar \
       docker://registry.dpeckett.dev/immutos/debco/debian:bookworm-ultraslim
-  RUN skopeo copy --multi-arch all oci-archive:bookwork-ultraslim-bootable.tar \
-      docker://registry.dpeckett.dev/immutos/debco/debian:bookwork-ultraslim-bootable
+  RUN skopeo copy --multi-arch all oci-archive:bookworm-ultraslim-bootable.tar \
+      docker://registry.dpeckett.dev/immutos/debco/debian:bookworm-ultraslim-bootable
 
 docker:
   FROM +tools
@@ -73,12 +73,12 @@ docker:
       -t registry.dpeckett.dev/immutos/debco/debian:bookworm-ultraslim
   END
   WITH DOCKER
-    RUN debco build --dev -f examples/bookwork-ultraslim-bootable.yaml \
-      -o bookwork-ultraslim-bootable.tar -p ${PLATFORM} \
-      -t registry.dpeckett.dev/immutos/debco/debian:bookwork-ultraslim-bootable
+    RUN debco build --dev -f examples/bookworm-ultraslim-bootable.yaml \
+      -o bookworm-ultraslim-bootable.tar -p ${PLATFORM} \
+      -t registry.dpeckett.dev/immutos/debco/debian:bookworm-ultraslim-bootable
   END
   SAVE ARTIFACT ./bookworm-ultraslim.tar AS LOCAL dist/bookworm-ultraslim.tar
-  SAVE ARTIFACT ./bookwork-ultraslim-bootable.tar AS LOCAL dist/bookwork-ultraslim-bootable.tar
+  SAVE ARTIFACT ./bookworm-ultraslim-bootable.tar AS LOCAL dist/bookworm-ultraslim-bootable.tar
 
 package:
   FROM debian:bookworm
