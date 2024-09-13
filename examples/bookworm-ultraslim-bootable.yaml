@@ -1,4 +1,4 @@
-# A minimal bootable Debian Bookworm image.
+# A very minimal bootable Debian Bookworm image.
 apiVersion: debco/v1alpha1
 kind: Recipe
 
@@ -71,12 +71,12 @@ users:
 
 # Configuration for the OCI image.
 container:
-  user: nonroot
-  workingDir: /home/nonroot
+  user: root
+  workingDir: /root
   cmd:
     - /usr/bin/sh
   labels:
-    org.opencontainers.image.title: "Debian Bookworm Bootable"
-    org.opencontainers.image.description: "A minimal bootable Debian Bookworm image"
+    org.opencontainers.image.title: "Debian Bookworm UltraSlim Bootable"
+    org.opencontainers.image.description: "A very minimal bootable Debian Bookworm image"
     org.opencontainers.image.authors: "Damian Peckett <damian@pecke.tt>"
     org.opencontainers.image.source: "https://github.com/immutos/debco"
