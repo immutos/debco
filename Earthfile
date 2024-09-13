@@ -55,7 +55,10 @@ docker-push:
     && echo '{"default": [{"type": "insecureAcceptAnything"}]}' > /etc/containers/policy.json
   COPY +skopeo/skopeo /usr/local/bin/skopeo
   RUN --secret GITHUB_TOKEN=gh_token (echo ${GITHUB_TOKEN} | docker login ghcr.io -u USERNAME --password-stdin)
+  COPY (+docker/bookworm-bootable.tar --PLATFORM=linux/amd64,linux/arm64) ./
   COPY (+docker/bookworm-ultraslim.tar --PLATFORM=linux/amd64,linux/arm64) ./
+  RUN skopeo copy --multi-arch all oci-archive:bookworm-bootable.tar \
+      docker://ghcr.io/immutos/debco/debian:bookworm-bootable
   RUN skopeo copy --multi-arch all oci-archive:bookworm-ultraslim.tar \
       docker://ghcr.io/immutos/debco/debian:bookworm-ultraslim
 
@@ -65,11 +68,16 @@ docker:
   COPY examples ./examples
   ARG PLATFORM=linux/amd64
   WITH DOCKER
-    RUN debco build -f examples/bookworm-ultraslim.yaml \
-      -o bookworm-ultraslim.tar -p ${PLATFORM} \
-      -t ghcr.io/immutos/debco/debian:bookworm-ultraslim \
-      --dev
+    RUN debco build --dev -f examples/bookworm-bootable.yaml \
+      -o bookworm-bootable.tar -p ${PLATFORM} \
+      -t ghcr.io/immutos/debco/debian:bookworm-bootable
   END
+  WITH DOCKER
+    RUN debco build --dev -f examples/bookworm-ultraslim.yaml \
+      -o bookworm-ultraslim.tar -p ${PLATFORM} \
+      -t ghcr.io/immutos/debco/debian:bookworm-ultraslim
+  END
+  SAVE ARTIFACT ./bookworm-bootable.tar AS LOCAL dist/bookworm-bootable.tar
   SAVE ARTIFACT ./bookworm-ultraslim.tar AS LOCAL dist/bookworm-ultraslim.tar
 
 package:

@@ -94,9 +94,11 @@ type UserConfig struct {
 	// Groups is a list of groups to add the user to.
 	// The first group in the list will be treated as the users primary group.
 	Groups []string `yaml:"groups,omitempty"`
-	// HomeDir is the home directory for the user.
+	// HomeDir is the home directory for the user, if not specified, defaults
+	// to /home/<name>.
 	HomeDir string `yaml:"homeDir,omitempty"`
-	// Shell is the shell for the user.
+	// Shell is the shell for the user, if not specified, defaults to
+	// /usr/sbin/nologin.
 	Shell string `yaml:"shell,omitempty"`
 	// Password is the optional password for the user.
 	// If not specified, password authentication will be disabled.

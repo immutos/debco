@@ -1,0 +1,82 @@
+# A minimal bootable Debian Bookworm image.
+apiVersion: debco/v1alpha1
+kind: Recipe
+
+# Various options/flags to use when building the image.
+options:
+  # Don't automatically include priority required packages.
+  omitRequired: true
+  # Slimify the image by removing unnecessary files (ala debian-slim).
+  slimify: true
+
+# Where to get the packages from.
+sources:
+  - url: https://apt.dpeckett.dev
+    signedBy: https://apt.dpeckett.dev/signing_key.asc
+    distribution: bookworm
+    components:
+      - stable
+  - url: https://deb.debian.org/debian
+    signedBy: https://ftp-master.debian.org/keys/archive-key-12.asc
+    distribution: bookworm
+    components:
+      - main
+  - url: https://security.debian.org/debian-security
+    signedBy: https://ftp-master.debian.org/keys/archive-key-12-security.asc
+    distribution: bookworm-security
+    components:
+      - updates/main
+
+# The packages to include in the image.
+packages:
+  exclude:
+    - libelogind0 # Until we've added support for detecting conflicts.
+  include:
+    - base-files
+    - base-passwd
+    - coreutils
+    - ca-certificates
+    - dash
+    - diffutils
+    - dpkg
+    - findutils
+    - grep
+    - init-system-helpers
+    - libc6
+    - libc-bin
+    - libgcc-s1
+    - libgomp1
+    - libstdc++6
+    - login
+    - matchstick
+    - netbase
+    - openssl
+    - perl-base
+    - sed
+    - systemd
+    - tzdata
+    - udev
+    - util-linux
+
+# Create a distroless style nonroot user.
+groups:
+  - name: nonroot
+    gid: 65532
+users:
+  - name: nonroot
+    uid: 65532
+    groups: 
+      - nonroot
+    homeDir: /home/nonroot
+
+# Configuration for the OCI image.
+container:
+  user: nonroot
+  workingDir: /home/nonroot
+  cmd:
+    - /usr/bin/sh
+  labels:
+    org.opencontainers.image.title: "Debian Bookworm Bootable"
+    org.opencontainers.image.description: "A minimal bootable Debian Bookworm image"
+    org.opencontainers.image.authors: "Damian Peckett <damian@pecke.tt>"
+    org.opencontainers.image.source: "https://github.com/immutos/debco"

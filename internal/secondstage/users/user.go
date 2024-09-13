@@ -103,6 +103,22 @@ func CreateOrUpdateUser(user User) error {
 		}
 	}
 
+	if user.HomeDir == "" {
+		user.HomeDir = fmt.Sprintf("/home/%s", user.Name)
+	}
+
+	if err := os.MkdirAll(user.HomeDir, 0o700); err != nil {
+		return fmt.Errorf("failed to create home directory: %w", err)
+	}
+
+	if err := os.Chown(user.HomeDir, int(*user.UID), int(*primaryGroup.GID)); err != nil {
+		return fmt.Errorf("failed to chown home directory: %w", err)
+	}
+
+	if user.Shell == "" {
+		user.Shell = "/usr/sbin/nologin"
+	}
+
 	if err := updatePasswdFile(user, *primaryGroup.GID); err != nil {
 		return fmt.Errorf("failed to update passwd: %w", err)
 	}
