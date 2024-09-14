@@ -73,7 +73,7 @@ This image is intended for experimentation purposes only. You should build your
 own base images using the `debco build` command.
 
 ```shell
-docker run --rm -it ghcr.io/immutos/debco/debian:bookworm-ultraslim sh
+docker run --rm -it registry.dpeckett.dev/immutos/debco/debian:bookworm-ultraslim
 ```
 
 ## Telemetry
