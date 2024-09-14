@@ -49,37 +49,6 @@ test:
   END
   SAVE ARTIFACT ./coverage.out AS LOCAL coverage.out
 
-docker-push:
-  FROM +tools
-  RUN mkdir /etc/containers \
-    && echo '{"default": [{"type": "insecureAcceptAnything"}]}' > /etc/containers/policy.json
-  COPY +skopeo/skopeo /usr/local/bin/skopeo
-  RUN --secret REGISTRY_PASSWORD=registry_pw (echo ${REGISTRY_PASSWORD} | docker login registry.dpeckett.dev -u github-actions --password-stdin)
-  COPY (+docker/bookworm-ultraslim.tar --PLATFORM=linux/amd64,linux/arm64) ./
-  COPY (+docker/bookworm-ultraslim-bootable.tar --PLATFORM=linux/amd64,linux/arm64) ./
-  RUN skopeo copy --multi-arch all oci-archive:bookworm-ultraslim.tar \
-      docker://registry.dpeckett.dev/immutos/debco/debian:bookworm-ultraslim
-  RUN skopeo copy --multi-arch all oci-archive:bookworm-ultraslim-bootable.tar \
-      docker://registry.dpeckett.dev/immutos/debco/debian:bookworm-ultraslim-bootable
-
-docker:
-  FROM +tools
-  COPY +build/debco /usr/local/bin/debco
-  COPY examples ./examples
-  ARG PLATFORM=linux/amd64
-  WITH DOCKER
-    RUN debco build --dev -f examples/bookworm-ultraslim.yaml \
-      -o bookworm-ultraslim.tar -p ${PLATFORM} \
-      -t registry.dpeckett.dev/immutos/debco/debian:bookworm-ultraslim
-  END
-  WITH DOCKER
-    RUN debco build --dev -f examples/bookworm-ultraslim-bootable.yaml \
-      -o bookworm-ultraslim-bootable.tar -p ${PLATFORM} \
-      -t registry.dpeckett.dev/immutos/debco/debian:bookworm-ultraslim-bootable
-  END
-  SAVE ARTIFACT ./bookworm-ultraslim.tar AS LOCAL dist/bookworm-ultraslim.tar
-  SAVE ARTIFACT ./bookworm-ultraslim-bootable.tar AS LOCAL dist/bookworm-ultraslim-bootable.tar
-
 package:
   FROM debian:bookworm
   # Use bookworm-backports for newer golang versions
@@ -138,17 +107,8 @@ package:
   RUN dpkg-buildpackage -d -us -uc --host-arch=${GOARCH}
   SAVE ARTIFACT /workspace/*.deb AS LOCAL dist/
 
-skopeo:
-  FROM +tools
-  GIT CLONE --branch v1.15.1 https://github.com/containers/skopeo.git ./skopeo
-  WORKDIR /workspace/skopeo
-  RUN DISABLE_DOCS=1 make
-  SAVE ARTIFACT ./bin/skopeo
-
 tools:
   RUN apt update
   RUN apt install -y ca-certificates curl jq libgpgme-dev libassuan-dev \
     libbtrfs-dev libdevmapper-dev libostree-dev libseccomp-dev pkg-config
   RUN curl -fsSL https://get.docker.com | bash
-  RUN curl -fsSL -o /usr/local/bin/yq https://github.com/mikefarah/yq/releases/download/v4.44.2/yq_linux_amd64
-  RUN chmod +x /usr/local/bin/yq

@@ -27,9 +27,6 @@ jobs:
 
     - name: Test
       run: earthly -P +test
-
-    - name: Build Image
-      run: earthly -P +docker
   
   release:
     needs: build-and-test
@@ -51,15 +48,10 @@ jobs:
       run: earthly +all --VERSION=${{ github.ref_name }}
 
     - name: Release
-      uses: softprops/action-gh-release@v1
+      uses: softprops/action-gh-release@v2
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         files: |
           dist/*
           LICENSE
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    
-    - name: Push Image
-      run: earthly -P --secret registry_pw=$REGISTRY_PASSWORD +docker-push
-      env:
-        REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}

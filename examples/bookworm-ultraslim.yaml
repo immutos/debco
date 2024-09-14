@@ -61,8 +61,6 @@ users:
     uid: 65532
     groups: 
       - nonroot
-    homeDir: /home/nonroot
-    shell: /usr/sbin/nologin
 
 # Configuration for the OCI image.
 container:
@@ -75,3 +73,4 @@ container:
     org.opencontainers.image.description: "A very minimal Debian Bookworm image"
     org.opencontainers.image.authors: "Damian Peckett <damian@pecke.tt>"
     org.opencontainers.image.source: "https://github.com/immutos/debco"
+    org.opencontainers.image.ref.name: "registry.dpeckett.dev/debian:bookworm-ultraslim"
