@@ -17,7 +17,7 @@ Inspired by [apko](https://github.com/chainguard-dev/apko), [multistrap](https:/
 
 ### From APT
 
-Add my [apt repository](https://github.com/dpeckett/apt.dpeckett.dev?tab=readme-ov-file#usage) to your system.
+Add the [immutos apt repository](https://github.com/immutos/apt?tab=readme-ov-file#usage) to your system.
 
 Then install debco:
 
@@ -25,7 +25,7 @@ Then install debco:
 
 ```shell
 sudo apt update
-sudo apt install debco
+sudo apt install -y debco
 ```
 
 ### GitHub Releases
