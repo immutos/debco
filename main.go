@@ -239,7 +239,7 @@ func main() {
 					}
 					defer recipeFile.Close()
 
-					recipe, err := recipe.FromYAML(recipeFile)
+					rx, err := recipe.FromYAML(recipeFile)
 					if err != nil {
 						return fmt.Errorf("failed to read recipe: %w", err)
 					}
@@ -264,7 +264,8 @@ func main() {
 						OCIArchivePath:        c.String("output"),
 						RecipePath:            c.String("filename"),
 						SecondStageBinaryPath: secondStageBinaryPath,
-						ImageConf:             toOCIImageConfig(recipe),
+						DownloadOnly:          rx.Options.DownloadOnly,
+						ImageConf:             toOCIImageConfig(rx),
 						Tags:                  c.StringSlice("tag"),
 					}
 
@@ -283,7 +284,7 @@ func main() {
 						slog.Info("Loading packages")
 
 						var packageDB *database.PackageDB
-						packageDB, sourceDateEpoch, err := loadPackageDB(c.Context, recipe, platform)
+						packageDB, sourceDateEpoch, err := loadPackageDB(c.Context, rx, platform)
 						if err != nil {
 							return err
 						}
@@ -300,7 +301,7 @@ func main() {
 						}
 
 						// By default, install all priority required packages.
-						if !(recipe.Options != nil && recipe.Options.OmitRequired) {
+						if !(rx.Options != nil && rx.Options.OmitRequired) {
 							_ = packageDB.ForEach(func(pkg types.Package) error {
 								if pkg.Priority == "required" {
 									requiredNameVersions = append(requiredNameVersions, pkg.Package.Name)
@@ -313,8 +314,8 @@ func main() {
 						slog.Info("Resolving selected packages")
 
 						selectedDB, err := resolve.Resolve(packageDB,
-							append(requiredNameVersions, recipe.Packages.Include...),
-							recipe.Packages.Exclude)
+							append(requiredNameVersions, rx.Packages.Include...),
+							rx.Packages.Exclude)
 						if err != nil {
 							return err
 						}
@@ -391,12 +392,12 @@ func main() {
 							}
 							defer recipeFile.Close()
 
-							recipe, err := recipe.FromYAML(recipeFile)
+							rx, err := recipe.FromYAML(recipeFile)
 							if err != nil {
 								return fmt.Errorf("failed to read recipe: %w", err)
 							}
 
-							return secondstage.Provision(c.Context, recipe)
+							return secondstage.Provision(c.Context, rx)
 						},
 					},
 				},
@@ -410,7 +411,7 @@ func main() {
 	}
 }
 
-func loadPackageDB(ctx context.Context, recipe *latestrecipe.Recipe, platform ocispecs.Platform) (*database.PackageDB, time.Time, error) {
+func loadPackageDB(ctx context.Context, rx *latestrecipe.Recipe, platform ocispecs.Platform) (*database.PackageDB, time.Time, error) {
 	var componentsMu sync.Mutex
 	var components []source.Component
 
@@ -423,7 +424,7 @@ func loadPackageDB(ctx context.Context, recipe *latestrecipe.Recipe, platform oc
 	defer progress.Shutdown()
 
 	{
-		sourceConfs := append([]latestrecipe.SourceConfig{}, recipe.Sources...)
+		sourceConfs := append([]latestrecipe.SourceConfig{}, rx.Sources...)
 
 		g, ctx := errgroup.WithContext(ctx)
 
@@ -645,20 +646,20 @@ func downloadPackage(ctx context.Context, downloadDir, pkgURL, sha256 string) (s
 	return packageFile.Name(), nil
 }
 
-func toOCIImageConfig(recipe *latestrecipe.Recipe) ocispecs.ImageConfig {
-	if recipe.Container == nil {
+func toOCIImageConfig(rx *latestrecipe.Recipe) ocispecs.ImageConfig {
+	if rx.Container == nil {
 		return ocispecs.ImageConfig{}
 	}
 
 	return ocispecs.ImageConfig{
-		User:         recipe.Container.User,
-		ExposedPorts: recipe.Container.ExposedPorts,
-		Env:          recipe.Container.Env,
-		Entrypoint:   recipe.Container.Entrypoint,
-		Cmd:          recipe.Container.Cmd,
-		Volumes:      recipe.Container.Volumes,
-		WorkingDir:   recipe.Container.WorkingDir,
-		Labels:       recipe.Container.Labels,
-		StopSignal:   recipe.Container.StopSignal,
+		User:         rx.Container.User,
+		ExposedPorts: rx.Container.ExposedPorts,
+		Env:          rx.Container.Env,
+		Entrypoint:   rx.Container.Entrypoint,
+		Cmd:          rx.Container.Cmd,
+		Volumes:      rx.Container.Volumes,
+		WorkingDir:   rx.Container.WorkingDir,
+		Labels:       rx.Container.Labels,
+		StopSignal:   rx.Container.StopSignal,
 	}
 }

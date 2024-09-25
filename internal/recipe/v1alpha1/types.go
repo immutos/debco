@@ -49,6 +49,8 @@ type OptionsConfig struct {
 	OmitRequired bool `yaml:"omitRequired,omitempty"`
 	// Slimify specifies whether to slimify the image by removing unnecessary files.
 	Slimify bool `yaml:"slimify,omitempty"`
+	// DownloadOnly specifies whether to only download packages and not install them.
+	DownloadOnly bool `yaml:"downloadOnly,omitempty"`
 }
 
 // SourceConfig is the configuration for an apt repository.

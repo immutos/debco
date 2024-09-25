@@ -69,6 +69,8 @@ type BuildOptions struct {
 	SourceDateEpoch time.Time
 	// SecondStageBinaryPath optionally overrides the path to the second-stage binary.
 	SecondStageBinaryPath string
+	// DownloadOnly specifies whether to only download packages and not install them.
+	DownloadOnly bool
 	// ImageConf is the optional OCI image configuration.
 	ImageConf ocispecs.ImageConfig
 	// Tags is a list of tags to apply to the image.
@@ -124,34 +126,36 @@ func (b *BuildKit) Build(ctx context.Context, opts BuildOptions) error {
 				state = state.File(llb.Copy(llb.Local(buildContextKey), dataArchiveRelPath, "/", &llb.CopyInfo{AttemptUnpack: true}))
 			}
 
-			if opts.SecondStageBinaryPath != "" {
-				// Copy the debco binary into the root filesystem.
-				state = state.File(llb.Copy(llb.Local("second-stage-bin"), filepath.Base(opts.SecondStageBinaryPath), "/usr/bin/debco", &llb.CopyInfo{}))
-			}
+			if !opts.DownloadOnly {
+				if opts.SecondStageBinaryPath != "" {
+					// Copy the debco binary into the root filesystem.
+					state = state.File(llb.Copy(llb.Local("second-stage-bin"), filepath.Base(opts.SecondStageBinaryPath), "/usr/bin/debco", &llb.CopyInfo{}))
+				}
 
-			state = state.
-				Run(llb.Shlex("debco second-stage merge-usr")).                   // Merge the /usr directory into the root filesystem.
-				Run(llb.Shlex("/var/lib/dpkg/info/base-passwd.preinst install")). // Create the /etc/group and /etc/passwd files (needed by dpkg).
-				Run(llb.Shlex("dpkg --configure -a")).                            // Configure the packages.
-				// Remove the dpkg log file, alternatives log file, and ldconfig cache file.
-				// These files are no longer needed and will lead to irreproducible builds.
-				File(llb.Rm("/var/log/dpkg.log")).
-				File(llb.Rm("/var/log/alternatives.log")).
-				File(llb.Rm("/var/cache/ldconfig/aux-cache"))
+				state = state.
+					Run(llb.Shlex("debco second-stage merge-usr")).                   // Merge the /usr directory into the root filesystem.
+					Run(llb.Shlex("/var/lib/dpkg/info/base-passwd.preinst install")). // Create the /etc/group and /etc/passwd files (needed by dpkg).
+					Run(llb.Shlex("dpkg --configure -a")).                            // Configure the packages.
+					// Remove the dpkg log file, alternatives log file, and ldconfig cache file.
+					// These files are no longer needed and will lead to irreproducible builds.
+					File(llb.Rm("/var/log/dpkg.log")).
+					File(llb.Rm("/var/log/alternatives.log")).
+					File(llb.Rm("/var/cache/ldconfig/aux-cache"))
 
-			// Provision image (eg. create users/groups etc).
-			state = state.
-				File(llb.Copy(llb.Local("conf"), filepath.Base(opts.RecipePath), "/etc/debco/config.yaml", &llb.CopyInfo{CreateDestPath: true})).
-				Run(llb.Shlex("debco second-stage provision -f /etc/debco/config.yaml")).
-				Root().
-				File(llb.Rm("/etc/debco"))
+				// Provision image (eg. create users/groups etc).
+				state = state.
+					File(llb.Copy(llb.Local("conf"), filepath.Base(opts.RecipePath), "/etc/debco/config.yaml", &llb.CopyInfo{CreateDestPath: true})).
+					Run(llb.Shlex("debco second-stage provision -f /etc/debco/config.yaml")).
+					Root().
+					File(llb.Rm("/etc/debco"))
 
-			// Remove the no longer needed debco binary.
-			if opts.SecondStageBinaryPath != "" {
-				state = state.File(llb.Rm("/usr/bin/debco"))
-			} else {
-				state = state.Run(llb.Shlex("dpkg -r debco")).
-					Root()
+				// Remove the no longer needed debco binary.
+				if opts.SecondStageBinaryPath != "" {
+					state = state.File(llb.Rm("/usr/bin/debco"))
+				} else {
+					state = state.Run(llb.Shlex("dpkg -r debco")).
+						Root()
+				}
 			}
 
 			// Squash everything into a single final layer.

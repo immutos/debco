@@ -29,8 +29,8 @@ import (
 	"github.com/immutos/debco/internal/secondstage/users"
 )
 
-func Provision(ctx context.Context, recipe *latestrecipe.Recipe) error {
-	if recipe.Options != nil && recipe.Options.Slimify {
+func Provision(ctx context.Context, rx *latestrecipe.Recipe) error {
+	if rx.Options != nil && rx.Options.Slimify {
 		slog.Info("Slimifying image")
 
 		if err := slimify.Slimify(); err != nil {
@@ -38,7 +38,7 @@ func Provision(ctx context.Context, recipe *latestrecipe.Recipe) error {
 		}
 	}
 
-	for _, groupConf := range recipe.Groups {
+	for _, groupConf := range rx.Groups {
 		slog.Info("Creating or updating group", slog.String("name", groupConf.Name))
 
 		group := users.Group{
@@ -53,7 +53,7 @@ func Provision(ctx context.Context, recipe *latestrecipe.Recipe) error {
 		}
 	}
 
-	for _, userConf := range recipe.Users {
+	for _, userConf := range rx.Users {
 		slog.Info("Creating or updating user", slog.String("name", userConf.Name))
 
 		user := users.User{
