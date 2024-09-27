@@ -58,8 +58,11 @@ package:
   RUN apt install -y git curl devscripts dpkg-dev debhelper-compat git-buildpackage libfaketime dh-sequence-golang \
     golang-any=2:1.22~3~bpo12+1 golang-go=2:1.22~3~bpo12+1 golang-src=2:1.22~3~bpo12+1 \
     gcc-aarch64-linux-gnu gcc-riscv64-linux-gnu
+  # Add our apt repositories.
   RUN curl -fsL -o /etc/apt/keyrings/apt-dpeckett-dev-keyring.asc https://apt.dpeckett.dev/signing_key.asc \
     && echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/apt-dpeckett-dev-keyring.asc] http://apt.dpeckett.dev $(. /etc/os-release && echo $VERSION_CODENAME) stable" > /etc/apt/sources.list.d/apt-dpeckett-dev.list \
+    && curl -fsL -o /etc/apt/keyrings/apt-immutos-com-keyring.asc https://apt.immutos.com/signing_key.asc \
+    && echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/apt-immutos-com-keyring.asc] http://apt.immutos.com $(. /etc/os-release && echo $VERSION_CODENAME) stable" > /etc/apt/sources.list.d/apt-immutos-com.list \
     && apt update
   # Build Dependencies
   RUN apt install -y \
