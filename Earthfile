@@ -79,7 +79,7 @@ package:
     golang-github-google-btree-dev \
     golang-github-gregjones-httpcache-dev \
     golang-github-grpc-ecosystem-grpc-opentracing-dev \
-    golang-github-jaguilar-vt100-dev=0.0~git20240719.6f69db9-1 \
+    golang-github-jaguilar-vt100-dev=0.0~git20240927.f0871c4-1 \
     golang-github-moby-patternmatcher-dev \
     golang-github-opencontainers-image-spec-dev=1.1.0-2~bpo12+1 \
     golang-github-otiai10-copy-dev \
@@ -87,7 +87,7 @@ package:
     golang-github-rogpeppe-go-internal-dev \
     golang-github-google-shlex-dev \
     golang-github-stretchr-testify-dev \
-    golang-github-tonistiigi-fsutil-dev=0.0~git20240902.85aeae2-1 \
+    golang-github-tonistiigi-fsutil-dev=0.0~git20240927.3189a99-1 \
     golang-github-tonistiigi-units-dev \
     golang-github-urfave-cli-v2-dev \
     golang-github-vbauerster-mpb-dev=8.6.1-3~bpo12+1 \
