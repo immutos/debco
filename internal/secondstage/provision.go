@@ -23,6 +23,8 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"path/filepath"
+	"strings"
 
 	latestrecipe "github.com/immutos/debco/internal/recipe/v1alpha1"
 	"github.com/immutos/debco/internal/secondstage/slimify"
@@ -74,6 +76,18 @@ func Provision(ctx context.Context, rx *latestrecipe.Recipe) error {
 	// Create the data mountpoint.
 	if err := os.MkdirAll("/mnt/data", 0o755); err != nil {
 		return fmt.Errorf("failed to create /mnt/data mountpoint: %w", err)
+	}
+
+	// If necessary create a /vmlinuz symlink to the latest kernel.
+	var latestKernel string
+	if kernels, err := filepath.Glob("/boot/vmlinuz*"); err == nil {
+		latestKernel = kernels[len(kernels)-1]
+	}
+
+	if latestKernel != "" {
+		if err := os.Symlink(strings.TrimPrefix(latestKernel, "/"), "/vmlinuz"); err != nil {
+			return fmt.Errorf("failed to create /vmlinuz symlink: %w", err)
+		}
 	}
 
 	return nil
