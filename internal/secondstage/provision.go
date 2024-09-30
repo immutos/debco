@@ -79,13 +79,13 @@ func Provision(ctx context.Context, rx *latestrecipe.Recipe) error {
 	}
 
 	// If necessary create a /vmlinuz symlink to the latest kernel.
-	var latestKernel string
-	if kernels, err := filepath.Glob("/boot/vmlinuz*"); err == nil {
-		latestKernel = kernels[len(kernels)-1]
+	var latestKernelPath string
+	if kernelPaths, _ := filepath.Glob("/boot/vmlinuz*"); len(kernelPaths) > 0 {
+		latestKernelPath = kernelPaths[len(kernelPaths)-1]
 	}
 
-	if latestKernel != "" {
-		if err := os.Symlink(strings.TrimPrefix(latestKernel, "/"), "/vmlinuz"); err != nil {
+	if latestKernelPath != "" {
+		if err := os.Symlink(strings.TrimPrefix(latestKernelPath, "/"), "/vmlinuz"); err != nil {
 			return fmt.Errorf("failed to create /vmlinuz symlink: %w", err)
 		}
 	}
