@@ -159,13 +159,15 @@ func Unpack(ctx context.Context, tempDir string, packagePaths []string) (string,
 				return "", nil, fmt.Errorf("failed to get data archive file list: %w", err)
 			}
 
-			// Write the files list to the dpkg info directory.
-			filesListPath := filepath.Join("var/lib/dpkg/info", fmt.Sprintf("%s.list", pkg.Name))
-			if err := dpkgDatabaseFS.WriteFile(filesListPath, []byte(strings.Join(filesList, "\n")+"\n"), 0o644); err != nil {
-				bar.Abort(true)
-				bar.Wait()
+			if len(filesList) > 0 {
+				// Write the files list to the dpkg info directory.
+				filesListPath := filepath.Join("var/lib/dpkg/info", fmt.Sprintf("%s.list", pkg.Name))
+				if err := dpkgDatabaseFS.WriteFile(filesListPath, []byte(strings.Join(filesList, "\n")+"\n"), 0o644); err != nil {
+					bar.Abort(true)
+					bar.Wait()
 
-				return "", nil, fmt.Errorf("failed to write files list: %w", err)
+					return "", nil, fmt.Errorf("failed to write files list: %w", err)
+				}
 			}
 
 			bar.Increment()
