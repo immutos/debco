@@ -62,7 +62,7 @@ package:
   RUN curl -fsL -o /etc/apt/keyrings/apt-dpeckett-dev-keyring.asc https://apt.dpeckett.dev/signing_key.asc \
     && echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/apt-dpeckett-dev-keyring.asc] http://apt.dpeckett.dev $(. /etc/os-release && echo $VERSION_CODENAME) stable" > /etc/apt/sources.list.d/apt-dpeckett-dev.list \
     && curl -fsL -o /etc/apt/keyrings/apt-immutos-com-keyring.asc https://apt.immutos.com/signing_key.asc \
-    && echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/apt-immutos-com-keyring.asc] http://apt.immutos.com $(. /etc/os-release && echo $VERSION_CODENAME) stable" > /etc/apt/sources.list.d/apt-immutos-com.list \
+    && echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/apt-immutos-com-keyring.asc] http://apt.immutos.com $(. /etc/os-release && echo $VERSION_CODENAME) main" > /etc/apt/sources.list.d/apt-immutos-com.list \
     && apt update
   # Build Dependencies
   RUN apt install -y \
