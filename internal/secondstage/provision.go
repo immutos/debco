@@ -22,9 +22,6 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
-	"os"
-	"path/filepath"
-	"strings"
 
 	latestrecipe "github.com/immutos/debco/internal/recipe/v1alpha1"
 	"github.com/immutos/debco/internal/secondstage/slimify"
@@ -70,23 +67,6 @@ func Provision(ctx context.Context, rx *latestrecipe.Recipe) error {
 
 		if err := users.CreateOrUpdateUser(user); err != nil {
 			return fmt.Errorf("failed to create or update user %q: %w", userConf.Name, err)
-		}
-	}
-
-	// Create the data mountpoint.
-	if err := os.MkdirAll("/mnt/data", 0o755); err != nil {
-		return fmt.Errorf("failed to create /mnt/data mountpoint: %w", err)
-	}
-
-	// If necessary create a /vmlinuz symlink to the latest kernel.
-	var latestKernelPath string
-	if kernelPaths, _ := filepath.Glob("/boot/vmlinuz*"); len(kernelPaths) > 0 {
-		latestKernelPath = kernelPaths[len(kernelPaths)-1]
-	}
-
-	if latestKernelPath != "" {
-		if err := os.Symlink(strings.TrimPrefix(latestKernelPath, "/"), "/vmlinuz"); err != nil {
-			return fmt.Errorf("failed to create /vmlinuz symlink: %w", err)
 		}
 	}
 
